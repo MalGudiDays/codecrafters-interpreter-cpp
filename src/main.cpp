@@ -62,9 +62,28 @@ int main(int argc, char *argv[])
                 int                         line_num  = 1;
                 while(std::getline(stream, line))
                 {
+                    int         quote_index = -1;
+                    std::string quote       = "";
                     for(int ii = 0; ii < line.size(); ii++)
                     {
                         char ch = line[ii];
+                        if(ch == '"' || quote_index != -1)
+                        {
+                            if(quote_index == -1)
+                            {
+                                quote_index = ii;
+                            }
+                            else if(ch == '"' && line[ii - 1] != '\\')
+                            {
+                                tokens.push_back("STRING \"" + quote + "\" " + quote);
+                                quote_index = -1;
+                            }
+                            else
+                            {
+                                quote += ch;
+                            }
+                            continue;
+                        }
                         if(token_map.find(ch) != token_map.end())
                         {
                             if(ch == '=' && ii && line[ii - 1] == '=' && tokens.size() &&
@@ -113,6 +132,12 @@ int main(int argc, char *argv[])
                                       << "] Error: Unexpected character: " << ch
                                       << std::endl;
                         }
+                    }
+                    if(quote_index != -1)
+                    {
+                        retVal = 65;
+                        std::cerr << "[line " << line_num
+                                  << "] Error: Unterminated string" << std::endl;
                     }
                     ++line_num;
                 }
