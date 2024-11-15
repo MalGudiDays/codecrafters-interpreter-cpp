@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
                                                          {'+', "PLUS "},
                                                          {';', "SEMICOLON "},
                                                          {'*', "STAR "},
+                                                         {'!', "BANG "},
                                                          {'=', "EQUAL "},
                                                          {'/', "SLASH "}};
                 int                         line_num  = 1;
@@ -64,10 +65,19 @@ int main(int argc, char *argv[])
                         if(token_map.find(ch) != token_map.end())
                         {
                             if(ch == '=' && tokens.size() &&
-                               tokens.back() == "EQUAL = null")
+                               (tokens.back() == "EQUAL = null" ||
+                                tokens.back() == "BANG ! null"))
                             {
+                                std::string tn = tokens.back();
                                 tokens.pop_back();
-                                tokens.push_back("EQUAL_EQUAL == null");
+                                if(tn == "EQUAL = null")
+                                {
+                                    tokens.push_back("EQUAL_EQUAL == null");
+                                }
+                                else
+                                {
+                                    tokens.push_back("BANG_EQUAL != null");
+                                }
                             }
                             else
                             {
