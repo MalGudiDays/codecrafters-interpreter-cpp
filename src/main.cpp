@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
                             continue;
                         }
                         bool isDigitorDot = (ch >= '0' && ch <= '9') || ch == '.';
-                        if(isDigitorDot || number_index != -1)
+                        if((ch >= '0' && ch <= '9') || number_index != -1)
                         {
                             if(number_index == -1)
                             {
