@@ -54,6 +54,7 @@ int main(int argc, char *argv[])
                                                          {'+', "PLUS "},
                                                          {';', "SEMICOLON "},
                                                          {'*', "STAR "},
+                                                         {'=', "EQUAL "},
                                                          {'/', "SLASH "}};
                 int                         line_num  = 1;
                 while(std::getline(stream, line))
@@ -62,7 +63,16 @@ int main(int argc, char *argv[])
                     {
                         if(token_map.find(ch) != token_map.end())
                         {
-                            tokens.push_back(token_map[ch] + ch + " null");
+                            if(ch == '=' && tokens.size() &&
+                               tokens.back() == "EQUAL = null")
+                            {
+                                tokens.pop_back();
+                                tokens.push_back("EQUAL_EQUAL == null");
+                            }
+                            else
+                            {
+                                tokens.push_back(token_map[ch] + ch + " null");
+                            }
                         }
                         else
                         {
