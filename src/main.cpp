@@ -30,8 +30,25 @@ int main(int argc, char *argv[])
 
         if(!file_contents.empty())
         {
-            std::cerr << "Scanner not implemented" << std::endl;
-            return 1;
+            std::istringstream stream(file_contents);
+            std::string        line;
+            while(std::getline(stream, line))
+            {
+                for(char ch: line)
+                {
+                    switch(ch)
+                    {
+                    case '(':
+                        std::cout << "LPAREN  " << ch << std::endl;
+                        break;
+                    case ')':
+                        std::cout << "RPAREN  " << ch << std::endl;
+                        break;
+                    default:
+                        break;
+                    }
+                }
+            }
         }
         std::cout << "EOF  null" << std::endl;
         // Placeholder, remove this line when
