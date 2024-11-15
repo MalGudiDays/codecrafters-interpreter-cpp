@@ -15,6 +15,22 @@ void printTokens(const std::vector<std::string> &tokens)
     }
 }
 
+void getnumstr(std::string &number, std::string &numberstr)
+{
+    size_t foundat = number.find('.');
+    if(foundat == std::string::npos)
+    {
+        numberstr = number + ".0";
+        return;
+    }
+    int i = number.size() - 1;
+    while(i > foundat + 1 && number[i] == '0')
+    {
+        i--;
+    }
+    numberstr = number.substr(0, i + 1);
+}
+
 int main(int argc, char *argv[])
 {
     int retVal = 0;
@@ -98,10 +114,7 @@ int main(int argc, char *argv[])
                             else if(!isDigitorDot)
                             {
                                 std::string numberstr = number;
-                                if(number.find('.') == std::string::npos)
-                                {
-                                    numberstr = number + ".0";
-                                }
+                                getnumstr(number, numberstr);
                                 tokens.push_back("NUMBER " + number + " " + numberstr);
                                 number_index = -1;
                                 number       = "";
@@ -168,10 +181,7 @@ int main(int argc, char *argv[])
                     if(number_index != -1)
                     {
                         std::string numberstr = number;
-                        if(number.find('.') == std::string::npos)
-                        {
-                            numberstr = number + ".0";
-                        }
+                        getnumstr(number, numberstr);
                         tokens.push_back("NUMBER " + number + " " + numberstr);
                     }
                     ++line_num;
