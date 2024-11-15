@@ -65,19 +65,13 @@ int main(int argc, char *argv[])
                         char ch = line[ii];
                         if(token_map.find(ch) != token_map.end())
                         {
-                            if(ch == '=' && ii &&
-                               (line[ii - 1] == '=' || line[ii - 1] == '!'))
+                            if(ch == '=' && ii && line[ii - 1] == '=')
                             {
-                                std::string tn = tokens.back();
-                                tokens.pop_back();
-                                if(line[ii - 1] == '=')
-                                {
-                                    tokens.push_back("EQUAL_EQUAL == null");
-                                }
-                                else
-                                {
-                                    tokens.push_back("BANG_EQUAL != null");
-                                }
+                                tokens.push_back("EQUAL_EQUAL == null");
+                            }
+                            else if(ch == '!' && ii && line[ii - 1] == '=')
+                            {
+                                tokens.push_back("BANG_EQUAL != null");
                             }
                             else
                             {
