@@ -102,6 +102,10 @@ int main(int argc, char *argv[])
                                 tokens.push_back(token_map[ch] + ch + " null");
                             }
                         }
+                        else if(ch == '\t' || ch == ' ')
+                        {
+                            continue;
+                        }
                         else
                         {
                             retVal = 65;
