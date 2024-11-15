@@ -65,12 +65,14 @@ int main(int argc, char *argv[])
                         char ch = line[ii];
                         if(token_map.find(ch) != token_map.end())
                         {
-                            if(ch == '=' && ii && line[ii - 1] == '=')
+                            if(ch == '=' && ii && line[ii - 1] == '=' && tokens.size() &&
+                               tokens.back() == "EQUAL = null")
                             {
                                 tokens.pop_back();
                                 tokens.push_back("EQUAL_EQUAL == null");
                             }
-                            else if(ch == '=' && ii && line[ii - 1] == '!')
+                            else if(ch == '=' && ii && line[ii - 1] == '!' &&
+                                    tokens.size() && tokens.back() == "BANG ! null")
                             {
                                 tokens.pop_back();
                                 tokens.push_back("BANG_EQUAL != null");
