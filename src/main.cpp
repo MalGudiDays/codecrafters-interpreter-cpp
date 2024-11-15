@@ -137,7 +137,7 @@ int main(int argc, char *argv[])
                     {
                         retVal = 65;
                         std::cerr << "[line " << line_num
-                                  << "] Error: Unterminated string" << std::endl;
+                                  << "] Error: Unterminated string." << std::endl;
                     }
                     ++line_num;
                 }
