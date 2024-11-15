@@ -67,10 +67,12 @@ int main(int argc, char *argv[])
                         {
                             if(ch == '=' && ii && line[ii - 1] == '=')
                             {
+                                tokens.pop_back();
                                 tokens.push_back("EQUAL_EQUAL == null");
                             }
                             else if(ch == '!' && ii && line[ii - 1] == '=')
                             {
+                                tokens.pop_back();
                                 tokens.push_back("BANG_EQUAL != null");
                             }
                             else
