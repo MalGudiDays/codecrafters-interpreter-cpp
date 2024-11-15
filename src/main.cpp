@@ -67,8 +67,9 @@ int main(int argc, char *argv[])
                         else
                         {
                             retVal = 65;
-                            tokens.push_back("[line " + std::to_string(line_num) +
-                                             "] Error: Unexpected character: " + ch);
+                            std::cerr << "[line " << line_num
+                                      << "] Error: Unexpected character: " << ch
+                                      << std::endl;
                         }
                     }
                     if(retVal != 0)
