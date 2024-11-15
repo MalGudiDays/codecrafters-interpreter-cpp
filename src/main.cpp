@@ -77,6 +77,7 @@ int main(int argc, char *argv[])
                             {
                                 tokens.push_back("STRING \"" + quote + "\" " + quote);
                                 quote_index = -1;
+                                quote       = "";
                             }
                             else
                             {
