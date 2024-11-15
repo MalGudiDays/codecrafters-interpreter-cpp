@@ -72,11 +72,6 @@ int main(int argc, char *argv[])
                                       << std::endl;
                         }
                     }
-                    if(retVal != 0)
-                    {
-                        printTokens(tokens);
-                        return retVal;
-                    }
                     ++line_num;
                 }
                 printTokens(tokens);
