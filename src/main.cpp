@@ -62,8 +62,10 @@ int main(int argc, char *argv[])
                 int                         line_num  = 1;
                 while(std::getline(stream, line))
                 {
-                    int         quote_index = -1;
-                    std::string quote       = "";
+                    int         quote_index  = -1;
+                    std::string quote        = "";
+                    int         number_index = -1;
+                    std::string number       = "";
                     for(int ii = 0; ii < line.size(); ii++)
                     {
                         char ch = line[ii];
@@ -83,6 +85,29 @@ int main(int argc, char *argv[])
                             {
                                 quote += ch;
                             }
+                            continue;
+                        }
+                        bool isDigitorDot = (ch >= '0' && ch <= '9') || ch == '.';
+                        if(isDigitorDot || number_index != -1)
+                        {
+                            if(number_index == -1)
+                            {
+                                number_index = ii;
+                                number += ch;
+                            }
+                            else if(!isDigitorDot)
+                            {
+                                std::string numberstr = number;
+                                if(number.find('.') == std::string::npos)
+                                {
+                                    numberstr = number + ".0";
+                                }
+                                tokens.push_back("NUMBER " + number + " " + numberstr);
+                                number_index = -1;
+                                number       = "";
+                            }
+                            else
+                                number += ch;
                             continue;
                         }
                         if(token_map.find(ch) != token_map.end())
@@ -139,6 +164,15 @@ int main(int argc, char *argv[])
                         retVal = 65;
                         std::cerr << "[line " << line_num
                                   << "] Error: Unterminated string." << std::endl;
+                    }
+                    if(number_index != -1)
+                    {
+                        std::string numberstr = number;
+                        if(number.find('.') == std::string::npos)
+                        {
+                            numberstr = number + ".0";
+                        }
+                        tokens.push_back("NUMBER " + number + " " + numberstr);
                     }
                     ++line_num;
                 }
