@@ -118,6 +118,10 @@ int main(int argc, char *argv[])
                                 tokens.push_back("NUMBER " + number + " " + numberstr);
                                 number_index = -1;
                                 number       = "";
+                                if(ii < line.size() && ii > 0)
+                                {
+                                    ii--;
+                                }
                             }
                             else
                                 number += ch;
