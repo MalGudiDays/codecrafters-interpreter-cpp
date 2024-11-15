@@ -39,10 +39,10 @@ int main(int argc, char *argv[])
                     switch(ch)
                     {
                     case '(':
-                        std::cout << "LEFT_PAREN  " << ch << " null" << std::endl;
+                        std::cout << "LEFT_PAREN " << ch << " null" << std::endl;
                         break;
                     case ')':
-                        std::cout << "RIGHT_PAREN  " << ch << " null" << std::endl;
+                        std::cout << "RIGHT_PAREN " << ch << " null" << std::endl;
                         break;
                     default:
                         break;
