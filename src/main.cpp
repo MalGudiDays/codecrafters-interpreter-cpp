@@ -2,11 +2,22 @@
 #include <string>
 #include <fstream>
 #include <sstream>
+#include <vector>
+#include <map>
 
 std::string read_file_contents(const std::string &filename);
 
+void printTokens(const std::vector<std::string> &tokens)
+{
+    for(const std::string &token: tokens)
+    {
+        std::cout << token << std::endl;
+    }
+}
+
 int main(int argc, char *argv[])
 {
+    int retVal = 0;
     // Disable output buffering
     std::cout << std::unitbuf;
     std::cerr << std::unitbuf;
@@ -30,52 +41,39 @@ int main(int argc, char *argv[])
 
         if(!file_contents.empty())
         {
-            std::istringstream stream(file_contents);
-            std::string        line;
+            std::istringstream          stream(file_contents);
+            std::string                 line;
+            std::vector<std::string>    tokens;
+            std::map<char, std::string> token_map = {{'(', "LEFT_PAREN "},
+                                                     {')', "RIGHT_PAREN "},
+                                                     {'{', "LEFT_BRACE "},
+                                                     {'}', "RIGHT_BRACE "},
+                                                     {',', "COMMA "},
+                                                     {'.', "DOT "},
+                                                     {'-', "MINUS "},
+                                                     {'+', "PLUS "},
+                                                     {';', "SEMICOLON "},
+                                                     {'*', "STAR "},
+                                                     {'/', "SLASH "}};
+            int                         line_num  = 1;
             while(std::getline(stream, line))
             {
                 for(char ch: line)
                 {
-                    switch(ch)
+                    if(token_map.find(ch) != token_map.end())
                     {
-                    case '(':
-                        std::cout << "LEFT_PAREN " << ch << " null" << std::endl;
-                        break;
-                    case ')':
-                        std::cout << "RIGHT_PAREN " << ch << " null" << std::endl;
-                        break;
-                    case '{':
-                        std::cout << "LEFT_BRACE " << ch << " null" << std::endl;
-                        break;
-                    case '}':
-                        std::cout << "RIGHT_BRACE " << ch << " null" << std::endl;
-                        break;
-                    case ',':
-                        std::cout << "COMMA " << ch << " null" << std::endl;
-                        break;
-                    case '.':
-                        std::cout << "DOT " << ch << " null" << std::endl;
-                        break;
-                    case '-':
-                        std::cout << "MINUS " << ch << " null" << std::endl;
-                        break;
-                    case '+':
-                        std::cout << "PLUS " << ch << " null" << std::endl;
-                        break;
-                    case ';':
-                        std::cout << "SEMICOLON " << ch << " null" << std::endl;
-                        break;
-                    case '*':
-                        std::cout << "STAR " << ch << " null" << std::endl;
-                        break;
-                    case '/':
-                        std::cout << "SLASH " << ch << " null" << std::endl;
-                        break;
-                    default:
-                        break;
+                        tokens.push_back(token_map[ch] + ch + " null");
+                    }
+                    else
+                    {
+                        retVal = 65;
+                        tokens.push_back("[line " + std::to_string(line_num) +
+                                         "] Error: Unexpected character: " + ch);
                     }
                 }
+                ++line_num;
             }
+            printTokens(tokens);
         }
         std::cout << "EOF  null" << std::endl;
         // Placeholder, remove this line when
@@ -87,7 +85,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    return 0;
+    return retVal;
 }
 
 std::string read_file_contents(const std::string &filename)
