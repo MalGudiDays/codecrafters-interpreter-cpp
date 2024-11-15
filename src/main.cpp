@@ -91,6 +91,12 @@ int main(int argc, char *argv[])
                                 tokens.pop_back();
                                 tokens.push_back("GREATER_EQUAL >= null");
                             }
+                            else if(ch == '/' && ii && line[ii - 1] == '/' &&
+                                    tokens.size() && tokens.back() == "SLASH / null")
+                            {
+                                tokens.pop_back();
+                                break;
+                            }
                             else
                             {
                                 tokens.push_back(token_map[ch] + ch + " null");
