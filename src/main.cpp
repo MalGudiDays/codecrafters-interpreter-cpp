@@ -60,17 +60,17 @@ int main(int argc, char *argv[])
                 int                         line_num  = 1;
                 while(std::getline(stream, line))
                 {
-                    for(char ch: line)
+                    for(int ii = 0; ii < line.size(); ii++)
                     {
+                        char ch = line[ii];
                         if(token_map.find(ch) != token_map.end())
                         {
-                            if(ch == '=' && tokens.size() &&
-                               (tokens.back() == "EQUAL = null" ||
-                                tokens.back() == "BANG ! null"))
+                            if(ch == '=' && ii &&
+                               (line[ii - 1] == '=' || line[ii - 1] == '!'))
                             {
                                 std::string tn = tokens.back();
                                 tokens.pop_back();
-                                if(tn == "EQUAL = null")
+                                if(line[ii - 1] == '=')
                                 {
                                     tokens.push_back("EQUAL_EQUAL == null");
                                 }
