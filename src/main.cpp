@@ -50,6 +50,24 @@ int main(int argc, char *argv[])
                     case '}':
                         std::cout << "RIGHT_BRACE " << ch << " null" << std::endl;
                         break;
+                    case ',':
+                        std::cout << "COMMA " << ch << " null" << std::endl;
+                        break;
+                    case '.':
+                        std::cout << "DOT " << ch << " null" << std::endl;
+                        break;
+                    case '-':
+                        std::cout << "MINUS " << ch << " null" << std::endl;
+                        break;
+                    case '+':
+                        std::cout << "PLUS " << ch << " null" << std::endl;
+                        break;
+                    case '*':
+                        std::cout << "STAR " << ch << " null" << std::endl;
+                        break;
+                    case '/':
+                        std::cout << "SLASH " << ch << " null" << std::endl;
+                        break;
                     default:
                         break;
                     }
