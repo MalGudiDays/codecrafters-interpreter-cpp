@@ -56,6 +56,8 @@ int main(int argc, char *argv[])
                                                          {'*', "STAR "},
                                                          {'!', "BANG "},
                                                          {'=', "EQUAL "},
+                                                         {'<', "LESS "},
+                                                         {'>', "GREATER "},
                                                          {'/', "SLASH "}};
                 int                         line_num  = 1;
                 while(std::getline(stream, line))
@@ -76,6 +78,18 @@ int main(int argc, char *argv[])
                             {
                                 tokens.pop_back();
                                 tokens.push_back("BANG_EQUAL != null");
+                            }
+                            else if(ch == '=' && ii && line[ii - 1] == '<' &&
+                                    tokens.size() && tokens.back() == "LESS < null")
+                            {
+                                tokens.pop_back();
+                                tokens.push_back("LESS_EQUAL <= null");
+                            }
+                            else if(ch == '=' && ii && line[ii - 1] == '>' &&
+                                    tokens.size() && tokens.back() == "GREATER > null")
+                            {
+                                tokens.pop_back();
+                                tokens.push_back("GREATER_EQUAL >= null");
                             }
                             else
                             {
