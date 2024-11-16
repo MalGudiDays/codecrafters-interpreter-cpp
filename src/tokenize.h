@@ -9,7 +9,7 @@ class Tokenizer
 {
   public:
     Tokenizer();
-    void tokenize(const std::string &file_contents, int &retVal);
+    void tokenize(const std::string &file_contents, int &ret);
 
   private:
     void processLine(const std::string &line);
@@ -31,6 +31,7 @@ class Tokenizer
     int                         literal_index;
     std::string                 literal;
     int                         line_num;
+    int                         retVal;
 };
 
 #endif // TOKENIZER_H
