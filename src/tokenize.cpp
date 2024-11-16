@@ -221,18 +221,15 @@ bool Tokenizer::isreserved(const std::string &ltrl)
 
 void Tokenizer::finalizeLiteral(std::string &literal)
 {
+    std::string identifier = "IDENTIFIER";
     if(isreserved(literal))
     {
-        std::string literalstr = literal;
-        std::transform(literalstr.begin(), literalstr.end(), literalstr.begin(), ::toupper);
-        tokens.push_back(literalstr + " " + literal + " null");
+        identifier = literal;
+        std::transform(identifier.begin(), identifier.end(), identifier.begin(), ::toupper);
     }
-    else
-    {
-        tokens.push_back("IDENTIFIER " + literal + " null");
-        literal_index = -1;
-        literal.clear();
-    }
+    tokens.push_back(identifier + " " + literal + " null");
+    literal_index = -1;
+    literal.clear();
 }
 
 void Tokenizer::handleLiteral(char ch, int &index, const std::string &line)
