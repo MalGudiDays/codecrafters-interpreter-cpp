@@ -42,6 +42,13 @@ int main(int argc, char *argv[])
                     parse(tokens, retVal);
                 }
             }
+            else
+            {
+                for(const std::string &token: tokens)
+                {
+                    std::cout << token << std::endl;
+                }
+            }
         }
         else
         {
