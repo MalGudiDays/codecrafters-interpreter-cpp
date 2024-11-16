@@ -77,14 +77,7 @@ void parse(const std::vector<std::string> &tokens, int &retVal)
         ans += math_operator;
     }
 
-    if(stack.size() != 1)
-    {
-        std::cerr << "Invalid expression" << std::endl;
-        retVal = 1;
-        return;
-    }
-
-    std::cout << stack[0]->val << std::endl;
+    std::cout << ans << std::endl;
 }
 
 void PostOrderTraversal(TreeNode *root)
