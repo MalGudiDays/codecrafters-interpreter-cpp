@@ -40,7 +40,9 @@ Tokenizer::Tokenizer()
                  {'/', "SLASH "}};
 }
 
-void Tokenizer::tokenize(const std::string &file_contents, int &ret)
+void Tokenizer::tokenize(const std::string        &file_contents,
+                         int                      &ret,
+                         std::vector<std::string> &toks)
 {
     if(!file_contents.empty())
     {
@@ -51,10 +53,11 @@ void Tokenizer::tokenize(const std::string &file_contents, int &ret)
             processLine(line);
             ++line_num;
         }
-        printTokens();
+        // printTokens();
     }
     std::cout << "EOF  null" << std::endl;
-    ret = retVal;
+    ret  = retVal;
+    toks = tokens;
 }
 
 void Tokenizer::processLine(const std::string &line)

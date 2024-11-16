@@ -9,7 +9,9 @@ class Tokenizer
 {
   public:
     Tokenizer();
-    void tokenize(const std::string &file_contents, int &ret);
+    void tokenize(const std::string        &file_contents,
+                  int                      &ret,
+                  std::vector<std::string> &tokens);
 
   private:
     void processLine(const std::string &line);
