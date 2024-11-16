@@ -27,17 +27,20 @@ int main(int argc, char *argv[])
 
         const std::string command = args[0];
 
-        if(command == "tokenize")
+        if(command == "tokenize" || command == "parse")
         {
             std::string file_contents = read_file_contents(args[1]);
 
             std::vector<std::string> tokens;
             Tokenizer                tokenizer;
             tokenizer.tokenize(file_contents, retVal, tokens);
-            tokens.pop_back();
-            if(retVal == 0)
+            if(command == "parse")
             {
-                parse(tokens, retVal);
+                tokens.pop_back();
+                if(retVal == 0)
+                {
+                    parse(tokens, retVal);
+                }
             }
         }
         else
