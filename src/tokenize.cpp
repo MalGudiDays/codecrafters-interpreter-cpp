@@ -143,8 +143,7 @@ void Tokenizer::handleQuote(char ch, int &index, const std::string &line)
     }
     if(index == line.size() && quote_index != -1)
     {
-        std::cerr << "[line " << line.size() << "] Error: Unterminated string."
-                  << std::endl;
+        std::cerr << "[line " << line_num << "] Error: Unterminated string." << std::endl;
     }
 }
 
