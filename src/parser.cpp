@@ -87,7 +87,10 @@ void parse(const std::vector<std::string> &tokens, int &retVal)
         }
         ans += math_operator;
     }
-
+    if(ans.size() && (ans[0] != '(' && ans[0] != '{'))
+    {
+        ans = "(" + ans + ")";
+    }
     std::cout << ans << std::endl;
 }
 
