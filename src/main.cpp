@@ -30,14 +30,8 @@ int main(int argc, char *argv[])
         {
             std::string file_contents = read_file_contents(args[1]);
 
-            // Uncomment this block to pass the first stage
-            if(!file_contents.empty())
-            {
-                Tokenizer tokenizer;
-                tokenizer.tokenize(file_contents, retVal);
-            }
-            // Placeholder, remove this line when
-            // implementing the scanner
+            Tokenizer tokenizer;
+            tokenizer.tokenize(file_contents, retVal);
         }
         else
         {
