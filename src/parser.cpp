@@ -32,6 +32,13 @@ bool getmiddlestring(std::string &tok, std::string &math_operator)
         }
         return true;
     }
+    else if(currliteral == "MINUS" || currliteral == "BANG")
+    {
+        size_t next_space = tok.find(' ', found + 1);
+        math_operator     = tok.substr(found + 1, next_space - found - 1);
+        math_operator     = math_operator + " ";
+        return true;
+    }
     size_t next_space = tok.find(" ", found + 1);
     math_operator     = tok.substr(found + 1, next_space - found - 1);
     return true;
