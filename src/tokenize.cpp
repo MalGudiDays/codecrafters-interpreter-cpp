@@ -54,7 +54,13 @@ void Tokenizer::processLine(const std::string &line)
 
 void Tokenizer::processCharacter(char ch, int &index, const std::string &line)
 {
-    if(ch == '"' && quote_index == -1)
+    if(ch == '%' || ch == '#' || ch == '@')
+    {
+        retVal = 65;
+        std::cerr << "[line " << line_num << "] Error: Unexpected character: " << ch
+                  << std::endl;
+    }
+    else if(ch == '"' && quote_index == -1)
     {
         handleQuote(ch, index, line);
     }
@@ -69,12 +75,6 @@ void Tokenizer::processCharacter(char ch, int &index, const std::string &line)
     else if(token_map.find(ch) != token_map.end())
     {
         handleToken(ch, index, line);
-    }
-    else if(ch == '%' || ch == '#' || ch == '@')
-    {
-        retVal = 65;
-        std::cerr << "[line " << line_num << "] Error: Unexpected character: " << ch
-                  << std::endl;
     }
     else
     {
