@@ -19,6 +19,8 @@ class Tokenizer
     void handleNumber(char ch, int &index, const std::string &line);
     void handleToken(char ch, int &index, const std::string &line);
     void finalizeNumber();
+    bool isreserved(const std::string &literal);
+    void finalizeLiteral(std::string &literal);
     void printTokens() const;
     void getnumstr(std::string &number, std::string &numberstr);
 

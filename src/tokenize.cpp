@@ -207,11 +207,11 @@ void Tokenizer::handleToken(char ch, int &index, const std::string &line)
     }
 }
 
-bool Tokenizer::isreserved(const std::string &literal)
+bool Tokenizer::isreserved(const std::string &ltrl)
 {
     for(const std::string &word: reserved_words)
     {
-        if(literal == word)
+        if(ltrl == word)
         {
             return true;
         }
