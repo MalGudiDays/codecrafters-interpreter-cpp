@@ -23,10 +23,9 @@ class Parser
 {
   public:
     static void parse(const std::vector<std::string> &tokens, int &retVal);
-    bool        getmiddlestring(const std::string &tok, std::string &math_operator);
 
   private:
-    int opened_brace = 0;
+    static bool getmiddlestring(const std::string &tok, std::string &math_operator);
 };
 
 #endif // PARSER_H

@@ -1,5 +1,7 @@
 #include "parser.h"
 
+static int opened_brace = 0;
+
 bool Parser::getmiddlestring(const std::string &tok, std::string &math_operator)
 {
     size_t      found       = tok.find(" ");
