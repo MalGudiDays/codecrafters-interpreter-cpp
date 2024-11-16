@@ -95,6 +95,11 @@ void Parser::parse(const std::vector<std::string> &tokens, int &retVal)
         }
         ans += math_operator;
     }
+    while(opened_brace > 0)
+    {
+        ans += ")";
+        opened_brace--;
+    }
     if(ans.size() && (ans[0] != '(' && ans[0] != '{'))
     {
         ans = "(" + ans + ")";
