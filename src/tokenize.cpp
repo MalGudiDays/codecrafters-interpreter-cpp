@@ -116,7 +116,7 @@ void Tokenizer::handleLiteral(char ch, int &index, const std::string &line)
     }
     if(index == line.size() && literal_index != -1)
     {
-        tokens.push_back("IDENTIFIER " + literal + " " + literal);
+        tokens.push_back("IDENTIFIER " + literal + " null");
         literal_index = -1;
         literal.clear();
     }
