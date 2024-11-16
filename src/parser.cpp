@@ -18,7 +18,7 @@ bool getmiddlestring(std::string &tok, std::string &math_operator)
     {
         found             = tok.find('\"');
         size_t next_space = tok.find('\"', found + 1);
-        math_operator     = "group " + tok.substr(found + 1, next_space - found - 1);
+        math_operator     = tok.substr(found + 1, next_space - found - 1);
         return true;
     }
     else if(currliteral == "LEFT_PAREN" || currliteral == "RIGHT_PAREN" ||
@@ -26,6 +26,10 @@ bool getmiddlestring(std::string &tok, std::string &math_operator)
     {
         size_t next_space = tok.find(' ', found + 1);
         math_operator     = tok.substr(found + 1, next_space - found - 1);
+        if(currliteral == "LEFT_PAREN" || currliteral == "LEFT_BRACE")
+        {
+            math_operator = math_operator + "group ";
+        }
         return true;
     }
     size_t next_space = tok.find(" ", found + 1);
