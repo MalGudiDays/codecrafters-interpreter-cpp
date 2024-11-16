@@ -53,11 +53,14 @@ void Tokenizer::tokenize(const std::string        &file_contents,
             processLine(line);
             ++line_num;
         }
-        // printTokens();
     }
-    std::cout << "EOF  null" << std::endl;
-    ret  = retVal;
-    toks = tokens;
+    if(tokens.size())
+    {
+        tokens.push_back("EOF  null");
+        toks = tokens;
+    }
+    // printTokens();
+    ret = retVal;
 }
 
 void Tokenizer::processLine(const std::string &line)

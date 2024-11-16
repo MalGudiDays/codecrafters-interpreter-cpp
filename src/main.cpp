@@ -5,6 +5,7 @@
 #include <vector>
 #include <map>
 #include "tokenize.h"
+#include "parser.h"
 
 std::string read_file_contents(const std::string &filename);
 
@@ -30,8 +31,14 @@ int main(int argc, char *argv[])
         {
             std::string file_contents = read_file_contents(args[1]);
 
-            Tokenizer tokenizer;
-            tokenizer.tokenize(file_contents, retVal);
+            std::vector<std::string> tokens;
+            Tokenizer                tokenizer;
+            tokenizer.tokenize(file_contents, retVal, tokens);
+            tokens.pop_back();
+            if(retVal == 0)
+            {
+                parse(tokens, retVal);
+            }
         }
         else
         {
