@@ -54,11 +54,8 @@ void Tokenizer::tokenize(const std::string        &file_contents,
             ++line_num;
         }
     }
-    if(tokens.size())
-    {
-        tokens.push_back("EOF  null");
-        toks = tokens;
-    }
+    tokens.push_back("EOF  null");
+    toks = tokens;
     // printTokens();
     ret = retVal;
 }
