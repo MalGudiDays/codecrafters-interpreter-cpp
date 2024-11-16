@@ -18,7 +18,7 @@ bool getmiddlestring(std::string &tok, std::string &math_operator)
     {
         found             = tok.find('\"');
         size_t next_space = tok.find('\"', found + 1);
-        math_operator     = tok.substr(found + 1, next_space - found - 1);
+        math_operator     = "group " + tok.substr(found + 1, next_space - found - 1);
         return true;
     }
     else if(currliteral == "LEFT_PAREN" || currliteral == "RIGHT_PAREN" ||
@@ -64,6 +64,7 @@ void parse(const std::vector<std::string> &tokens, int &retVal)
     }
 
     std::vector<Node> stack;
+    std::string       ans = "";
     for(const auto &node: nodes)
     {
         std::string math_operator;
@@ -73,27 +74,7 @@ void parse(const std::vector<std::string> &tokens, int &retVal)
             retVal = 64;
             break;
         }
-        if(math_operator == "+" || math_operator == "-" || math_operator == "*" ||
-           math_operator == "/")
-        {
-            if(stack.size() < 2)
-            {
-                std::cerr << "Invalid expression" << std::endl;
-                retVal = 64;
-                return;
-            }
-
-            Node right = stack.back();
-            stack.pop_back();
-
-            Node left = stack.back();
-            stack.pop_back();
-
-            node->left  = left;
-            node->right = right;
-        }
-
-        stack.push_back(node);
+        ans += math_operator;
     }
 
     if(stack.size() != 1)
