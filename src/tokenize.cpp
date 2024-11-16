@@ -2,7 +2,8 @@
 #include <iostream>
 #include <sstream>
 
-Tokenizer::Tokenizer() : quote_index(-1), number_index(-1), literal_index(-1), line_num(1)
+Tokenizer::Tokenizer()
+    : quote_index(-1), number_index(-1), literal_index(-1), line_num(1), retVal(0)
 {
     token_map = {{'(', "LEFT_PAREN "},
                  {')', "RIGHT_PAREN "},
@@ -21,7 +22,7 @@ Tokenizer::Tokenizer() : quote_index(-1), number_index(-1), literal_index(-1), l
                  {'/', "SLASH "}};
 }
 
-void Tokenizer::tokenize(const std::string &file_contents, int &retVal)
+void Tokenizer::tokenize(const std::string &file_contents, int &ret)
 {
     if(!file_contents.empty())
     {
@@ -35,6 +36,7 @@ void Tokenizer::tokenize(const std::string &file_contents, int &retVal)
         printTokens();
     }
     std::cout << "EOF  null" << std::endl;
+    ret = retVal;
 }
 
 void Tokenizer::processLine(const std::string &line)
@@ -143,6 +145,7 @@ void Tokenizer::handleQuote(char ch, int &index, const std::string &line)
     }
     if(index == line.size() && quote_index != -1)
     {
+        retVal = 65;
         std::cerr << "[line " << line_num << "] Error: Unterminated string." << std::endl;
     }
 }
