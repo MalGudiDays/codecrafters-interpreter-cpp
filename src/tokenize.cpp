@@ -83,9 +83,9 @@ void Tokenizer::handleLiteral(char ch, int &index, const std::string &line)
 {
     while(index < line.size())
     {
-        ch                  = line[index];
-        bool isAlphaNumeric = (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'z') ||
-                              (ch >= 'A' && ch <= 'Z');
+        ch = line[index];
+        bool isAlphaNumeric =
+            ch != ' ' && ch != '\t' && token_map.find(ch) == token_map.end();
         if(literal_index == -1)
         {
             literal_index = index;
