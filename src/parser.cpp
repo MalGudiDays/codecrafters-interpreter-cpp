@@ -14,6 +14,13 @@ bool getmiddlestring(std::string &tok, std::string &math_operator)
         math_operator     = tok.substr(next_space + 1);
         return true;
     }
+    else if(currliteral == "STRING")
+    {
+        found             = tok.find('\"');
+        size_t next_space = tok.find('\"', found + 1);
+        math_operator     = tok.substr(found + 1, next_space - found - 1);
+        return true;
+    }
     size_t next_space = tok.find(" ", found + 1);
     math_operator     = tok.substr(found + 1, next_space - found - 1);
     return true;
