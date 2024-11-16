@@ -12,11 +12,12 @@ class Tokenizer
     void tokenize(const std::string &file_contents, int &retVal);
 
   private:
-    void processLine(const std::string &line, int line_num);
-    void processCharacter(char ch, int &index, const std::string &line, int line_num);
+    void processLine(const std::string &line);
+    void processCharacter(char ch, int &index, const std::string &line);
+    void handleLiteral(char ch, int &index, const std::string &line);
     void handleQuote(char ch, int &index, const std::string &line);
     void handleNumber(char ch, int &index, const std::string &line);
-    void handleToken(char ch, int &index, const std::string &line, int line_num);
+    void handleToken(char ch, int &index, const std::string &line);
     void finalizeNumber();
     void printTokens() const;
     void getnumstr(std::string &number, std::string &numberstr);
@@ -27,6 +28,9 @@ class Tokenizer
     std::string                 quote;
     int                         number_index;
     std::string                 number;
+    int                         literal_index;
+    std::string                 literal;
+    int                         line_num;
 };
 
 #endif // TOKENIZER_H

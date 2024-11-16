@@ -2,7 +2,7 @@
 #include <iostream>
 #include <sstream>
 
-Tokenizer::Tokenizer() : quote_index(-1), number_index(-1)
+Tokenizer::Tokenizer() : quote_index(-1), number_index(-1), literal_index(-1), line_num(1)
 {
     token_map = {{'(', "LEFT_PAREN "},
                  {')', "RIGHT_PAREN "},
@@ -27,10 +27,9 @@ void Tokenizer::tokenize(const std::string &file_contents, int &retVal)
     {
         std::istringstream stream(file_contents);
         std::string        line;
-        int                line_num = 1;
         while(std::getline(stream, line))
         {
-            processLine(line, line_num);
+            processLine(line);
             ++line_num;
         }
         printTokens();
@@ -38,11 +37,11 @@ void Tokenizer::tokenize(const std::string &file_contents, int &retVal)
     std::cout << "EOF  null" << std::endl;
 }
 
-void Tokenizer::processLine(const std::string &line, int line_num)
+void Tokenizer::processLine(const std::string &line)
 {
     for(int i = 0; i < line.size(); ++i)
     {
-        processCharacter(line[i], i, line, line_num);
+        processCharacter(line[i], i, line);
     }
     if(quote_index != -1)
     {
@@ -54,9 +53,9 @@ void Tokenizer::processLine(const std::string &line, int line_num)
     }
 }
 
-void Tokenizer::processCharacter(char ch, int &index, const std::string &line, int line_num)
+void Tokenizer::processCharacter(char ch, int &index, const std::string &line)
 {
-    if(ch == '"' || quote_index != -1)
+    if(ch == '"' && quote_index == -1)
     {
         handleQuote(ch, index, line);
     }
@@ -70,30 +69,83 @@ void Tokenizer::processCharacter(char ch, int &index, const std::string &line, i
     }
     else if(token_map.find(ch) != token_map.end())
     {
-        handleToken(ch, index, line, line_num);
+        handleToken(ch, index, line);
     }
     else if(ch == '$' || ch == '#' || ch == '@')
     {
         std::cerr << "[line " << line_num << "] Error: Unexpected character: " << ch
                   << std::endl;
     }
+    else
+    {
+        handleLiteral(ch, index, line);
+    }
+}
+
+void Tokenizer::handleLiteral(char ch, int &index, const std::string &line)
+{
+    while(index < line.size())
+    {
+        ch                  = line[index];
+        bool isAlphaNumeric = (ch >= '0' && ch <= '9') || (ch >= 'a' && ch <= 'z') ||
+                              (ch >= 'A' && ch <= 'Z');
+        if(literal_index == -1)
+        {
+            literal_index = index;
+            literal += ch;
+        }
+        else
+        {
+            if(!isAlphaNumeric)
+            {
+                tokens.push_back("IDENTIFIER " + literal + " " + literal);
+                literal_index = -1;
+                literal.clear();
+                if(index < line.size() && index > 0)
+                {
+                    --index;
+                }
+                return;
+            }
+            else
+            {
+                literal += ch;
+            }
+        }
+        ++index;
+    }
+    if(index == line.size() && literal_index != -1)
+    {
+        tokens.push_back("IDENTIFIER " + literal + " " + literal);
+        literal_index = -1;
+        literal.clear();
+    }
 }
 
 void Tokenizer::handleQuote(char ch, int &index, const std::string &line)
 {
-    if(quote_index == -1)
+    while(index < line.size())
     {
-        quote_index = index;
+        if(quote_index == -1)
+        {
+            quote_index = index;
+        }
+        else if(ch == '"')
+        {
+            tokens.push_back("STRING \"" + quote + "\" " + quote);
+            quote_index = -1;
+            quote.clear();
+        }
+        else
+        {
+            quote += ch;
+        }
+        ++index;
     }
-    else if(ch == '"' && line[index - 1] != '\\')
+    if(index == line.size() && quote_index != -1)
     {
-        tokens.push_back("STRING \"" + quote + "\" " + quote);
-        quote_index = -1;
-        quote.clear();
-    }
-    else
-    {
-        quote += ch;
+        std::cerr << "[line " << line.size() << "] Error: Unterminated string."
+                  << std::endl;
     }
 }
 
@@ -119,7 +171,7 @@ void Tokenizer::handleNumber(char ch, int &index, const std::string &line)
     }
 }
 
-void Tokenizer::handleToken(char ch, int &index, const std::string &line, int line_num)
+void Tokenizer::handleToken(char ch, int &index, const std::string &line)
 {
     if(token_map.find(ch) != token_map.end())
     {
