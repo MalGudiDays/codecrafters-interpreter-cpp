@@ -98,7 +98,7 @@ void Tokenizer::handleLiteral(char ch, int &index, const std::string &line)
         {
             if(!isAlphaNumeric)
             {
-                tokens.push_back("IDENTIFIER " + literal + " " + literal);
+                tokens.push_back("IDENTIFIER " + literal + " null");
                 literal_index = -1;
                 literal.clear();
                 if(index < line.size() && index > 0)
