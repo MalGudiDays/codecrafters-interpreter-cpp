@@ -126,6 +126,7 @@ void Tokenizer::handleQuote(char ch, int &index, const std::string &line)
 {
     while(index < line.size())
     {
+        ch = line[index];
         if(quote_index == -1)
         {
             quote_index = index;
@@ -151,23 +152,28 @@ void Tokenizer::handleQuote(char ch, int &index, const std::string &line)
 
 void Tokenizer::handleNumber(char ch, int &index, const std::string &line)
 {
-    bool isDigitorDot = (ch >= '0' && ch <= '9') || ch == '.';
-    if(number_index == -1)
+    while(index < line.size())
     {
-        number_index = index;
-        number += ch;
-    }
-    else if(!isDigitorDot)
-    {
-        finalizeNumber();
-        if(index < line.size() && index > 0)
+        ch                = line[index];
+        bool isDigitorDot = (ch >= '0' && ch <= '9') || ch == '.';
+        if(number_index == -1)
         {
-            --index;
+            number_index = index;
+            number += ch;
         }
-    }
-    else
-    {
-        number += ch;
+        else if(!isDigitorDot)
+        {
+            finalizeNumber();
+            if(index < line.size() && index > 0)
+            {
+                --index;
+            }
+        }
+        else
+        {
+            number += ch;
+        }
+        ++index;
     }
 }
 
