@@ -41,6 +41,11 @@ void Tokenizer::processLine(const std::string &line)
 {
     for(int i = 0; i < line.size(); ++i)
     {
+        if(line[i] == '/' && i && line[i - 1] == '/')
+        {
+            tokens.pop_back();
+            return;
+        }
         processCharacter(line[i], i, line);
     }
 }
