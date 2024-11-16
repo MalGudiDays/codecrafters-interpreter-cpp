@@ -1,6 +1,24 @@
 #include "tokenize.h"
 #include <iostream>
 #include <sstream>
+#include <algorithm>
+
+const std::vector<std::string> reserved_words{"and",
+                                              "class",
+                                              "else",
+                                              "false",
+                                              "for",
+                                              "fun",
+                                              "if",
+                                              "nil",
+                                              "or",
+                                              "print",
+                                              "return",
+                                              "super",
+                                              "this",
+                                              "true",
+                                              "var",
+                                              "while"};
 
 Tokenizer::Tokenizer()
     : quote_index(-1), number_index(-1), literal_index(-1), line_num(1), retVal(0)
@@ -79,46 +97,6 @@ void Tokenizer::processCharacter(char ch, int &index, const std::string &line)
     else
     {
         handleLiteral(ch, index, line);
-    }
-}
-
-void Tokenizer::handleLiteral(char ch, int &index, const std::string &line)
-{
-    while(index < line.size())
-    {
-        ch = line[index];
-        bool isAlphaNumeric =
-            ch != ' ' && ch != '\t' && token_map.find(ch) == token_map.end();
-        if(literal_index == -1)
-        {
-            literal_index = index;
-            literal += ch;
-        }
-        else
-        {
-            if(!isAlphaNumeric)
-            {
-                tokens.push_back("IDENTIFIER " + literal + " null");
-                literal_index = -1;
-                literal.clear();
-                if(index < line.size() && index > 0)
-                {
-                    --index;
-                }
-                return;
-            }
-            else
-            {
-                literal += ch;
-            }
-        }
-        ++index;
-    }
-    if(index == line.size() && literal_index != -1)
-    {
-        tokens.push_back("IDENTIFIER " + literal + " null");
-        literal_index = -1;
-        literal.clear();
     }
 }
 
@@ -226,6 +204,70 @@ void Tokenizer::handleToken(char ch, int &index, const std::string &line)
     {
         std::cerr << "[line " << line_num << "] Error: Unexpected character: " << ch
                   << std::endl;
+    }
+}
+
+bool Tokenizer::isreserved(const std::string &literal)
+{
+    for(const std::string &word: reserved_words)
+    {
+        if(literal == word)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+
+void Tokenizer::finalizeLiteral(std::string &literal)
+{
+    if(isreserved(literal))
+    {
+        std::string literalstr = literal;
+        std::transform(literalstr.begin(), literalstr.end(), literalstr.begin(), ::toupper);
+        tokens.push_back(literalstr + " " + literal + " null");
+    }
+    else
+    {
+        tokens.push_back("IDENTIFIER " + literal + " null");
+        literal_index = -1;
+        literal.clear();
+    }
+}
+
+void Tokenizer::handleLiteral(char ch, int &index, const std::string &line)
+{
+    while(index < line.size())
+    {
+        ch = line[index];
+        bool isAlphaNumeric =
+            ch != ' ' && ch != '\t' && token_map.find(ch) == token_map.end();
+        if(literal_index == -1)
+        {
+            literal_index = index;
+            literal += ch;
+        }
+        else
+        {
+            if(!isAlphaNumeric)
+            {
+                finalizeLiteral(literal);
+                if(index < line.size() && index > 0)
+                {
+                    --index;
+                }
+                return;
+            }
+            else
+            {
+                literal += ch;
+            }
+        }
+        ++index;
+    }
+    if(index == line.size() && literal_index != -1)
+    {
+        finalizeLiteral(literal);
     }
 }
 
