@@ -54,7 +54,7 @@ void Tokenizer::processLine(const std::string &line)
 
 void Tokenizer::processCharacter(char ch, int &index, const std::string &line)
 {
-    if(ch == '%' || ch == '#' || ch == '@')
+    if(ch == '%' || ch == '#' || ch == '@' || ch == '$')
     {
         retVal = 65;
         std::cerr << "[line " << line_num << "] Error: Unexpected character: " << ch
