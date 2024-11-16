@@ -43,14 +43,6 @@ void Tokenizer::processLine(const std::string &line)
     {
         processCharacter(line[i], i, line);
     }
-    if(quote_index != -1)
-    {
-        std::cerr << "[line " << line_num << "] Error: Unterminated string." << std::endl;
-    }
-    if(number_index != -1)
-    {
-        finalizeNumber();
-    }
 }
 
 void Tokenizer::processCharacter(char ch, int &index, const std::string &line)
@@ -136,6 +128,7 @@ void Tokenizer::handleQuote(char ch, int &index, const std::string &line)
             tokens.push_back("STRING \"" + quote + "\" " + quote);
             quote_index = -1;
             quote.clear();
+            return;
         }
         else
         {
@@ -168,12 +161,17 @@ void Tokenizer::handleNumber(char ch, int &index, const std::string &line)
             {
                 --index;
             }
+            return;
         }
         else
         {
             number += ch;
         }
         ++index;
+    }
+    if(index == line.size() && number_index != -1)
+    {
+        finalizeNumber();
     }
 }
 
