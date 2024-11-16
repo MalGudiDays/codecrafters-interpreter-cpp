@@ -1,6 +1,6 @@
 #include "parser.h"
 
-bool getmiddlestring(std::string &tok, std::string &math_operator)
+bool Parser::getmiddlestring(const std::string &tok, std::string &math_operator)
 {
     size_t      found       = tok.find(" ");
     std::string currliteral = tok.substr(0, found);
@@ -36,15 +36,21 @@ bool getmiddlestring(std::string &tok, std::string &math_operator)
     {
         size_t next_space = tok.find(' ', found + 1);
         math_operator     = tok.substr(found + 1, next_space - found - 1);
-        math_operator     = math_operator + " ";
+        math_operator     = "(" + math_operator + " ";
+        opened_brace++;
         return true;
     }
     size_t next_space = tok.find(" ", found + 1);
     math_operator     = tok.substr(found + 1, next_space - found - 1);
+    if(opened_brace)
+    {
+        math_operator = math_operator + ")";
+        opened_brace--;
+    }
     return true;
 }
 
-void parse(const std::vector<std::string> &tokens, int &retVal)
+void Parser::parse(const std::vector<std::string> &tokens, int &retVal)
 {
     if(tokens.empty())
     {
