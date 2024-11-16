@@ -2,10 +2,17 @@
 
 bool getmiddlestring(std::string &tok, std::string &math_operator)
 {
-    size_t found = tok.find(" ");
-    if(tok.substr(0, found) == "EOF")
+    size_t      found       = tok.find(" ");
+    std::string currliteral = tok.substr(0, found);
+    if(currliteral == "EOF")
     {
         return false;
+    }
+    else if(currliteral == "NUMBER")
+    {
+        size_t next_space = tok.find(" ", found + 1);
+        math_operator     = tok.substr(next_space + 1);
+        return true;
     }
     size_t next_space = tok.find(" ", found + 1);
     math_operator     = tok.substr(found + 1, next_space - found - 1);
