@@ -22,10 +22,12 @@ using Node = std::shared_ptr<TreeNode>;
 class Parser
 {
   public:
-    static void parse(const std::vector<std::string> &tokens, int &retVal);
+    void parse(const std::vector<std::string> &tokens, int &retVal);
 
   private:
-    static bool getmiddlestring(const std::string &tok, std::string &math_operator);
+    bool        getmiddlestring(const std::string &tok, std::string &math_operator);
+    std::string infixToPrefix(const std::string &exp);
+    int         opened_brace = 0;
 };
 
 #endif // PARSER_H

@@ -1,6 +1,73 @@
 #include "parser.h"
+#include <stack>
 
-static int opened_brace = 0;
+int precedence(char op)
+{
+    if(op == '+' || op == '-') return 1;
+    if(op == '*' || op == '/') return 2;
+    return 0;
+}
+
+std::string reverseString(const std::string &str)
+{
+    std::string reversed = str;
+    std::reverse(reversed.begin(), reversed.end());
+    return reversed;
+}
+
+std::string Parser::infixToPrefix(const std::string &infix)
+{
+    std::string      reversedInfix = reverseString(infix);
+    std::stack<char> s;
+    std::string      postfix = "";
+
+    for(char ch: reversedInfix)
+    {
+        if(std::isspace(ch))
+        {
+            continue;
+        }
+        else if(std::isdigit(ch) || std::isalpha(ch) || ch == '.')
+        {
+            postfix += ch;
+        }
+        else if(ch == ')')
+        {
+            s.push(ch);
+        }
+        else if(ch == '(')
+        {
+            while(!s.empty() && s.top() != ')')
+            {
+                postfix += (std::string(1, s.top()) + " ");
+                s.pop();
+            }
+            if(!s.empty() && s.top() == ')')
+            {
+                s.pop();
+            }
+        }
+        else
+        {
+            postfix += " ";
+            while(!s.empty() && precedence(s.top()) > precedence(ch))
+            {
+                postfix += (std::string(1, s.top()) + " ");
+                s.pop();
+            }
+            s.push(ch);
+        }
+    }
+
+    while(!s.empty())
+    {
+        postfix += s.top();
+        s.pop();
+    }
+
+    std::string prefix = reverseString(postfix);
+    return prefix;
+}
 
 bool Parser::getmiddlestring(const std::string &tok, std::string &math_operator)
 {
@@ -104,7 +171,8 @@ void Parser::parse(const std::vector<std::string> &tokens, int &retVal)
     {
         ans = "(" + ans + ")";
     }
-    std::cout << ans << std::endl;
+    auto ans2 = infixToPrefix(ans);
+    std::cout << ans2 << std::endl;
 }
 
 void PostOrderTraversal(TreeNode *root)

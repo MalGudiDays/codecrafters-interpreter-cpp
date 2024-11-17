@@ -39,7 +39,8 @@ int main(int argc, char *argv[])
                 tokens.pop_back();
                 if(retVal == 0)
                 {
-                    Parser::parse(tokens, retVal);
+                    Parser p;
+                    p.parse(tokens, retVal);
                 }
             }
             else
