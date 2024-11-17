@@ -1,5 +1,6 @@
 #include "parser.h"
 #include <stack>
+#include <sstream>
 
 int precedence(char op)
 {
@@ -39,7 +40,7 @@ std::string Parser::infixToPrefix(const std::string &infix)
         {
             while(!s.empty() && s.top() != ')')
             {
-                postfix += (std::string(1, s.top()) + " ");
+                postfix += (" " + std::string(1, s.top()));
                 s.pop();
             }
             if(!s.empty() && s.top() == ')')
@@ -65,8 +66,42 @@ std::string Parser::infixToPrefix(const std::string &infix)
         s.pop();
     }
 
-    std::string prefix = reverseString(postfix);
-    return prefix;
+    // modify prefix string to add appropriate parenthesis if not present
+    std::string             prefix = reverseString(postfix), _prefix = "", ans = "";
+    std::istringstream      iss(prefix);
+    std::string             tk;
+    std::stack<std::string> st;
+    std::string             prev_string = "";
+    auto                    isCharSp    = [](char c) -> bool {
+        return c == '+' || c == '-' || c == '*' || c == '/';
+    };
+    while(iss >> tk)
+    {
+        if(isCharSp(tk[0]))
+        {
+            s.push(tk[0]);
+        }
+        else
+        {
+            st.push(tk);
+            if(st.size() == 2)
+            {
+                ans += "(" + std::string(1, s.top()) + " ";
+                st.pop();
+                s.pop();
+                ans += st.top() + " " + tk + ")";
+                st.pop();
+                st.push(ans);
+                ans = "";
+            }
+        }
+    }
+    if(!st.empty())
+    {
+        ans = st.top();
+        st.pop();
+    }
+    return ans;
 }
 
 bool Parser::getmiddlestring(const std::string &tok, std::string &math_operator)
@@ -87,7 +122,7 @@ bool Parser::getmiddlestring(const std::string &tok, std::string &math_operator)
     {
         found             = tok.find('\"');
         size_t next_space = tok.find('\"', found + 1);
-        math_operator     = tok.substr(found + 1, next_space - found - 1);
+        math_operator     = "group " + tok.substr(found + 1, next_space - found - 1);
         return true;
     }
     else if(currliteral == "LEFT_PAREN" || currliteral == "RIGHT_PAREN" ||
@@ -97,7 +132,7 @@ bool Parser::getmiddlestring(const std::string &tok, std::string &math_operator)
         math_operator     = tok.substr(found + 1, next_space - found - 1);
         if(currliteral == "LEFT_PAREN" || currliteral == "LEFT_BRACE")
         {
-            math_operator = math_operator + "group ";
+            // math_operator = math_operator + "group ";
         }
         return true;
     }
