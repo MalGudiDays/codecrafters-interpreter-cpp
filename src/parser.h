@@ -84,7 +84,8 @@ class Expression
     virtual std::string form_string()
     {
         return prefix_string;
-    };
+    }
+    virtual double evaluate() = 0;
 
   protected:
     std::string prefix_string = "";
@@ -108,6 +109,26 @@ class Binary : public Expression
         return "(" + op.lexeme + " " + left->form_string() + " " + right->form_string() +
                ")";
     }
+
+    double evaluate() override
+    {
+        double leftValue  = left->evaluate();
+        double rightValue = right->evaluate();
+
+        switch(op.token_type)
+        {
+        case TokenType::PLUS:
+            return leftValue + rightValue;
+        case TokenType::MINUS:
+            return leftValue - rightValue;
+        case TokenType::STAR:
+            return leftValue * rightValue;
+        case TokenType::SLASH:
+            return leftValue / rightValue;
+        default:
+            throw std::runtime_error("Unknown binary operator");
+        }
+    }
 };
 
 class Unary : public Expression
@@ -120,6 +141,21 @@ class Unary : public Expression
     virtual std::string form_string() override
     {
         return "(" + op.lexeme + " " + right->form_string() + ")";
+    }
+
+    double evaluate() override
+    {
+        double rightValue = right->evaluate();
+
+        switch(op.token_type)
+        {
+        case TokenType::MINUS:
+            return -rightValue;
+        case TokenType::BANG:
+            return !rightValue;
+        default:
+            throw std::runtime_error("Unknown unary operator");
+        }
     }
 };
 
@@ -134,6 +170,11 @@ class Literal : public Expression
     {
         return value;
     }
+
+    double evaluate() override
+    {
+        return std::stod(value);
+    }
 };
 
 class Grouping : public Expression
@@ -145,6 +186,11 @@ class Grouping : public Expression
     virtual std::string form_string() override
     {
         return "(group " + expression->form_string() + ")";
+    }
+
+    double evaluate() override
+    {
+        return expression->evaluate();
     }
 };
 

@@ -56,14 +56,14 @@ int main(int argc, char *argv[])
 
         const std::string command = args[0];
 
-        if(command == "tokenize" || command == "parse")
+        if(command == "tokenize" || command == "parse" || command == "evaluate")
         {
             std::string file_contents = read_file_contents(args[1]);
 
             std::vector<std::string> tokens;
             Tokenizer                tokenizer;
             tokenizer.tokenize(file_contents, retVal, tokens);
-            if(command == "parse")
+            if(command == "parse" || command == "evaluate")
             {
                 if(retVal) return retVal;
 
@@ -75,7 +75,23 @@ int main(int argc, char *argv[])
                 {
                     return 65;
                 }
-                std::cout << expr->form_string() << std::endl;
+                if(command == "evaluate")
+                {
+                    // Check if the expression is of type Literal
+                    if(auto literalExpr = std::dynamic_pointer_cast<Literal>(expr))
+                    {
+                        std::string result = literalExpr->value;
+                        std::cout << result << std::endl;
+                    }
+                    else
+                    {
+                        std::cout << expr->evaluate() << std::endl;
+                    }
+                }
+                else
+                {
+                    std::cout << expr->form_string() << std::endl;
+                }
             }
             else
             {
