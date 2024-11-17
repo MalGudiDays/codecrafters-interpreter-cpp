@@ -144,7 +144,7 @@ class Grouping : public Expression
     Grouping(std::shared_ptr<Expression> expression) : expression(expression) {}
     virtual std::string form_string() override
     {
-        return "(grouping " + expression->form_string() + ")";
+        return "(group " + expression->form_string() + ")";
     }
 };
 
