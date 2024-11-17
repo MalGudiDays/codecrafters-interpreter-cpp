@@ -8,6 +8,36 @@
 
 std::string read_file_contents(const std::string &filename);
 
+void tokenConvert(const std::vector<std::string> &tokens, std::vector<Token> &tokenList)
+{
+    for(const std::string &token: tokens)
+    {
+        std::istringstream iss(token);
+        std::string        tktype;
+        iss >> tktype;
+        if(tktype == "STRING")
+        {
+            int first = token.find_first_of('"');
+            int last  = token.find_last_of('"');
+            if(first != std::string::npos && last != std::string::npos && first < last)
+            {
+                std::string lexeme = token.substr(first + 1, last - first - 1);
+                tokenList.push_back(Token(TokenType::STRING, lexeme, lexeme, 0));
+                continue;
+            }
+            continue;
+        }
+        std::string lexeme;
+        iss >> lexeme;
+        std::string literal;
+        if(!(iss >> literal))
+        {
+            literal = " ";
+        }
+        tokenList.push_back(Token(tktype, lexeme, literal, 0));
+    }
+}
+
 int main(int argc, char *argv[])
 {
     int retVal = 0;
@@ -35,47 +65,17 @@ int main(int argc, char *argv[])
             tokenizer.tokenize(file_contents, retVal, tokens);
             if(command == "parse")
             {
-                // tokens.pop_back();
-                if(retVal == 0)
+                if(retVal) return retVal;
+
+                std::vector<Token> tokenList;
+                tokenConvert(tokens, tokenList);
+                Parser                      parser(tokenList);
+                std::shared_ptr<Expression> expr = parser.parse();
+                if(expr == nullptr)
                 {
-                    std::vector<Token> tokenList;
-                    for(const std::string &token: tokens)
-                    {
-                        std::istringstream iss(token);
-                        std::string        tktype;
-                        iss >> tktype;
-                        if(tktype == "STRING")
-                        {
-                            int first = token.find_first_of('"');
-                            int last  = token.find_last_of('"');
-                            if(first != std::string::npos && last != std::string::npos &&
-                               first < last)
-                            {
-                                std::string lexeme =
-                                    token.substr(first + 1, last - first - 1);
-                                tokenList.push_back(
-                                    Token(TokenType::STRING, lexeme, lexeme, 0));
-                                continue;
-                            }
-                            continue;
-                        }
-                        std::string lexeme;
-                        iss >> lexeme;
-                        std::string literal;
-                        if(!(iss >> literal))
-                        {
-                            literal = " ";
-                        }
-                        tokenList.push_back(Token(tktype, lexeme, literal, 0));
-                    }
-                    Parser                      parser(tokenList);
-                    std::shared_ptr<Expression> expr = parser.parse();
-                    if(expr == nullptr)
-                    {
-                        return 65;
-                    }
-                    std::cout << expr->form_string() << std::endl;
+                    return 65;
                 }
+                std::cout << expr->form_string() << std::endl;
             }
             else
             {
