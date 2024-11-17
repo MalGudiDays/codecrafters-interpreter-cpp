@@ -175,7 +175,7 @@ void Parser::error(const Token &token, const std::string &message)
 
 void Parser::report(int line, const std::string &where, const std::string &message)
 {
-    std::cerr << "[line " << line << "] Error" << where << ": " << message << std::endl;
+    // std::cerr << "[line " << line << "] Error" << where << ": " << message << std::endl;
 }
 
 void Token::getStringtoTokenType(const std::string &str, TokenType &type)

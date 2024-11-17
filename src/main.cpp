@@ -70,6 +70,10 @@ int main(int argc, char *argv[])
                     }
                     Parser                      parser(tokenList);
                     std::shared_ptr<Expression> expr = parser.parse();
+                    if(expr == nullptr)
+                    {
+                        return 65;
+                    }
                     std::cout << expr->form_string() << std::endl;
                 }
             }
