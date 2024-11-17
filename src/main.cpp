@@ -44,6 +44,21 @@ int main(int argc, char *argv[])
                         std::istringstream iss(token);
                         std::string        tktype;
                         iss >> tktype;
+                        if(tktype == "STRING")
+                        {
+                            int first = token.find_first_of('"');
+                            int last  = token.find_last_of('"');
+                            if(first != std::string::npos && last != std::string::npos &&
+                               first < last)
+                            {
+                                std::string lexeme =
+                                    token.substr(first + 1, last - first - 1);
+                                tokenList.push_back(
+                                    Token(TokenType::STRING, lexeme, lexeme, 0));
+                                continue;
+                            }
+                            continue;
+                        }
                         std::string lexeme;
                         iss >> lexeme;
                         std::string literal;
