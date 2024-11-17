@@ -3,7 +3,6 @@
 #include <fstream>
 #include <sstream>
 #include <vector>
-#include <map>
 #include "tokenize.h"
 #include "parser.h"
 
@@ -36,11 +35,27 @@ int main(int argc, char *argv[])
             tokenizer.tokenize(file_contents, retVal, tokens);
             if(command == "parse")
             {
-                tokens.pop_back();
+                // tokens.pop_back();
                 if(retVal == 0)
                 {
-                    Parser p;
-                    p.parse(tokens, retVal);
+                    std::vector<Token> tokenList;
+                    for(const std::string &token: tokens)
+                    {
+                        std::istringstream iss(token);
+                        std::string        tktype;
+                        iss >> tktype;
+                        std::string lexeme;
+                        iss >> lexeme;
+                        std::string literal;
+                        if(!(iss >> literal))
+                        {
+                            literal = " ";
+                        }
+                        tokenList.push_back(Token(tktype, lexeme, literal, 0));
+                    }
+                    Parser                      parser(tokenList);
+                    std::shared_ptr<Expression> expr = parser.parse();
+                    std::cout << expr->form_string() << std::endl;
                 }
             }
             else

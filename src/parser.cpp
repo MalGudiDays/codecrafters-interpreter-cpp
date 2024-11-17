@@ -1,223 +1,232 @@
 #include "parser.h"
-#include <stack>
-#include <sstream>
+#include <iostream>
+#include <stdexcept>
+#include <unordered_map>
 
-int precedence(char op)
+Parser::Parser(const std::vector<Token> &tokens) : tokens(tokens), current(0) {}
+
+std::shared_ptr<Expression> Parser::parse()
 {
-    if(op == '+' || op == '-') return 1;
-    if(op == '*' || op == '/') return 2;
-    return 0;
+    try
+    {
+        return expression();
+    }
+    catch(const std::runtime_error &e)
+    {
+        return nullptr;
+    }
 }
 
-std::string reverseString(const std::string &str)
+std::shared_ptr<Expression> Parser::expression()
 {
-    std::string reversed = str;
-    std::reverse(reversed.begin(), reversed.end());
-    return reversed;
+    return equality();
 }
 
-std::string Parser::infixToPrefix(const std::string &infix)
+std::shared_ptr<Expression> Parser::equality()
 {
-    std::string      reversedInfix = reverseString(infix);
-    std::stack<char> s;
-    std::string      postfix = "";
+    std::shared_ptr<Expression> expr = comparison();
 
-    for(char ch: reversedInfix)
+    while(match({TokenType::BANG_EQUAL, TokenType::EQUAL_EQUAL}))
     {
-        if(std::isspace(ch))
-        {
-            continue;
-        }
-        else if(std::isdigit(ch) || std::isalpha(ch) || ch == '.')
-        {
-            postfix += ch;
-        }
-        else if(ch == ')')
-        {
-            s.push(ch);
-        }
-        else if(ch == '(')
-        {
-            while(!s.empty() && s.top() != ')')
-            {
-                postfix += (" " + std::string(1, s.top()));
-                s.pop();
-            }
-            if(!s.empty() && s.top() == ')')
-            {
-                s.pop();
-            }
-        }
-        else
-        {
-            postfix += " ";
-            while(!s.empty() && precedence(s.top()) > precedence(ch))
-            {
-                postfix += (std::string(1, s.top()) + " ");
-                s.pop();
-            }
-            s.push(ch);
-        }
+        Token                       op    = previous();
+        std::shared_ptr<Expression> right = comparison();
+        expr                              = std::make_shared<Binary>(expr, op, right);
     }
 
-    while(!s.empty())
-    {
-        postfix += s.top();
-        s.pop();
-    }
-
-    // modify prefix string to add appropriate parenthesis if not present
-    std::string             prefix = reverseString(postfix), _prefix = "", ans = "";
-    std::istringstream      iss(prefix);
-    std::string             tk;
-    std::stack<std::string> st;
-    std::string             prev_string = "";
-    auto                    isCharSp    = [](char c) -> bool {
-        return c == '+' || c == '-' || c == '*' || c == '/';
-    };
-    while(iss >> tk)
-    {
-        if(isCharSp(tk[0]))
-        {
-            s.push(tk[0]);
-        }
-        else
-        {
-            st.push(tk);
-            if(st.size() == 2)
-            {
-                ans += "(" + std::string(1, s.top()) + " ";
-                st.pop();
-                s.pop();
-                ans += st.top() + " " + tk + ")";
-                st.pop();
-                st.push(ans);
-                ans = "";
-            }
-        }
-    }
-    if(!st.empty())
-    {
-        ans = st.top();
-        st.pop();
-    }
-    return ans;
+    return expr;
 }
 
-bool Parser::getmiddlestring(const std::string &tok, std::string &math_operator)
+std::shared_ptr<Expression> Parser::comparison()
 {
-    size_t      found       = tok.find(" ");
-    std::string currliteral = tok.substr(0, found);
-    if(currliteral == "EOF")
+    std::shared_ptr<Expression> expr = term();
+
+    while(match({TokenType::GREATER,
+                 TokenType::GREATER_EQUAL,
+                 TokenType::LESS,
+                 TokenType::LESS_EQUAL}))
     {
-        return false;
+        Token                       op    = previous();
+        std::shared_ptr<Expression> right = term();
+        expr                              = std::make_shared<Binary>(expr, op, right);
     }
-    else if(currliteral == "NUMBER")
-    {
-        size_t next_space = tok.find(" ", found + 1);
-        math_operator     = tok.substr(next_space + 1);
-        return true;
-    }
-    else if(currliteral == "STRING")
-    {
-        found             = tok.find('\"');
-        size_t next_space = tok.find('\"', found + 1);
-        math_operator     = "group " + tok.substr(found + 1, next_space - found - 1);
-        return true;
-    }
-    else if(currliteral == "LEFT_PAREN" || currliteral == "RIGHT_PAREN" ||
-            currliteral == "LEFT_BRACE" || currliteral == "RIGHT_BRACE")
-    {
-        size_t next_space = tok.find(' ', found + 1);
-        math_operator     = tok.substr(found + 1, next_space - found - 1);
-        if(currliteral == "LEFT_PAREN" || currliteral == "LEFT_BRACE")
-        {
-            // math_operator = math_operator + "group ";
-        }
-        return true;
-    }
-    else if(currliteral == "MINUS" || currliteral == "BANG")
-    {
-        size_t next_space = tok.find(' ', found + 1);
-        math_operator     = tok.substr(found + 1, next_space - found - 1);
-        math_operator     = "(" + math_operator + " ";
-        opened_brace++;
-        return true;
-    }
-    size_t next_space = tok.find(" ", found + 1);
-    math_operator     = tok.substr(found + 1, next_space - found - 1);
-    if(opened_brace)
-    {
-        math_operator = math_operator + ")";
-        opened_brace--;
-    }
-    return true;
+
+    return expr;
 }
 
-void Parser::parse(const std::vector<std::string> &tokens, int &retVal)
+std::shared_ptr<Expression> Parser::term()
 {
-    if(tokens.empty())
+    std::shared_ptr<Expression> expr = factor();
+
+    while(match({TokenType::MINUS, TokenType::PLUS}))
     {
-        std::cerr << "No tokens to parse" << std::endl;
-        retVal = 1;
-        return;
+        Token                       op    = previous();
+        std::shared_ptr<Expression> right = factor();
+        expr                              = std::make_shared<Binary>(expr, op, right);
     }
 
-    std::vector<Node> nodes;
-    for(const auto &token: tokens)
-    {
-        nodes.push_back(std::make_shared<TreeNode>(token));
-    }
-
-    if(nodes.size() == 1)
-    {
-        std::string math_operator = "";
-        std::string tok           = nodes[0].get()->val;
-        bool        val           = getmiddlestring(tok, math_operator);
-        if(!val)
-        {
-            retVal = 64;
-            std::cerr << "Invalid expression" << std::endl;
-            return;
-        }
-        std::cout << math_operator << std::endl;
-        return;
-    }
-
-    std::vector<Node> stack;
-    std::string       ans = "";
-    for(const auto &node: nodes)
-    {
-        std::string math_operator;
-        std::string tok = node.get()->val;
-        if(!getmiddlestring(tok, math_operator))
-        {
-            retVal = 64;
-            break;
-        }
-        ans += math_operator;
-    }
-    while(opened_brace > 0)
-    {
-        ans += ")";
-        opened_brace--;
-    }
-    if(ans.size() && (ans[0] != '(' && ans[0] != '{'))
-    {
-        ans = "(" + ans + ")";
-    }
-    auto ans2 = infixToPrefix(ans);
-    std::cout << ans2 << std::endl;
+    return expr;
 }
 
-void PostOrderTraversal(TreeNode *root)
+std::shared_ptr<Expression> Parser::factor()
 {
-    if(root == nullptr)
+    std::shared_ptr<Expression> expr = unary();
+
+    while(match({TokenType::SLASH, TokenType::STAR}))
     {
-        return;
+        Token                       op    = previous();
+        std::shared_ptr<Expression> right = unary();
+        expr                              = std::make_shared<Binary>(expr, op, right);
     }
 
-    PostOrderTraversal(root->left.get());
-    PostOrderTraversal(root->right.get());
-    std::cout << root->val << " ";
+    return expr;
+}
+
+std::shared_ptr<Expression> Parser::unary()
+{
+    if(match({TokenType::BANG, TokenType::MINUS}))
+    {
+        Token                       op    = previous();
+        std::shared_ptr<Expression> right = unary();
+        return std::make_shared<Unary>(op, right);
+    }
+
+    return primary();
+}
+
+std::shared_ptr<Expression> Parser::primary()
+{
+    if(match({TokenType::FALSE})) return std::make_shared<Literal>("false");
+    if(match({TokenType::TRUE})) return std::make_shared<Literal>("true");
+    if(match({TokenType::NIL})) return std::make_shared<Literal>("nil");
+
+    if(match({TokenType::NUMBER, TokenType::STRING}))
+    {
+        return std::make_shared<Literal>(previous().literal);
+    }
+
+    if(match({TokenType::LEFT_PAREN}))
+    {
+        std::shared_ptr<Expression> expr = expression();
+        consume(TokenType::RIGHT_PAREN, "Expect ')' after expression.");
+        return std::make_shared<Grouping>(expr);
+    }
+
+    throw std::runtime_error("Expect expression.");
+}
+
+bool Parser::match(const std::vector<TokenType> &types)
+{
+    for(TokenType type: types)
+    {
+        if(check(type))
+        {
+            advance();
+            return true;
+        }
+    }
+    return false;
+}
+
+bool Parser::check(TokenType type)
+{
+    if(isAtEnd()) return false;
+    return peek().token_type == type;
+}
+
+bool Parser::isAtEnd()
+{
+    return peek().token_type == TokenType::END_OF_FILE;
+}
+
+Token Parser::advance()
+{
+    if(!isAtEnd()) current++;
+    return previous();
+}
+
+Token Parser::peek()
+{
+    return tokens[current];
+}
+
+Token Parser::previous()
+{
+    return tokens[current - 1];
+}
+
+Token Parser::consume(TokenType type, const std::string &message)
+{
+    if(check(type)) return advance();
+    error(peek(), message);
+    throw std::runtime_error(message);
+}
+
+void Parser::error(const Token &token, const std::string &message)
+{
+    if(token.token_type == TokenType::END_OF_FILE)
+    {
+        report(token.line, " at end", message);
+    }
+    else
+    {
+        report(token.line, " at '" + token.lexeme + "'", message);
+    }
+}
+
+void Parser::report(int line, const std::string &where, const std::string &message)
+{
+    std::cerr << "[line " << line << "] Error" << where << ": " << message << std::endl;
+}
+
+void Token::getStringtoTokenType(const std::string &str, TokenType &type)
+{
+    static const std::unordered_map<std::string, TokenType> tokenMap = {
+        {"LEFT_PAREN", TokenType::LEFT_PAREN},
+        {"RIGHT_PAREN", TokenType::RIGHT_PAREN},
+        {"LEFT_BRACE", TokenType::LEFT_BRACE},
+        {"RIGHT_BRACE", TokenType::RIGHT_BRACE},
+        {"COMMA", TokenType::COMMA},
+        {"DOT", TokenType::DOT},
+        {"MINUS", TokenType::MINUS},
+        {"PLUS", TokenType::PLUS},
+        {"SEMICOLON", TokenType::SEMICOLON},
+        {"SLASH", TokenType::SLASH},
+        {"STAR", TokenType::STAR},
+        {"BANG", TokenType::BANG},
+        {"BANG_EQUAL", TokenType::BANG_EQUAL},
+        {"EQUAL", TokenType::EQUAL},
+        {"EQUAL_EQUAL", TokenType::EQUAL_EQUAL},
+        {"GREATER", TokenType::GREATER},
+        {"GREATER_EQUAL", TokenType::GREATER_EQUAL},
+        {"LESS", TokenType::LESS},
+        {"LESS_EQUAL", TokenType::LESS_EQUAL},
+        {"IDENTIFIER", TokenType::IDENTIFIER},
+        {"STRING", TokenType::STRING},
+        {"NUMBER", TokenType::NUMBER},
+        {"AND", TokenType::AND},
+        {"CLASS", TokenType::CLASS},
+        {"ELSE", TokenType::ELSE},
+        {"FALSE", TokenType::FALSE},
+        {"FUN", TokenType::FUN},
+        {"FOR", TokenType::FOR},
+        {"IF", TokenType::IF},
+        {"NIL", TokenType::NIL},
+        {"OR", TokenType::OR},
+        {"PRINT", TokenType::PRINT},
+        {"RETURN", TokenType::RETURN},
+        {"SUPER", TokenType::SUPER},
+        {"THIS", TokenType::THIS},
+        {"TRUE", TokenType::TRUE},
+        {"VAR", TokenType::VAR},
+        {"WHILE", TokenType::WHILE},
+        {"EOF", TokenType::END_OF_FILE}};
+    auto it = tokenMap.find(str);
+    if(it != tokenMap.end())
+    {
+        type = it->second;
+    }
+    else
+    {
+        throw std::runtime_error("Unknown token type: " + str);
+    }
 }
