@@ -145,15 +145,27 @@ class Unary : public Expression
 
     double evaluate() override
     {
-        double rightValue = right->evaluate();
-
-        switch(op.token_type)
+        double rightValue = 0.0;
+        try
         {
-        case TokenType::MINUS:
-            return -rightValue;
-        case TokenType::BANG:
-            return !rightValue;
-        default:
+            rightValue = right->evaluate();
+            switch(op.token_type)
+            {
+            case TokenType::MINUS:
+                return -rightValue;
+            case TokenType::BANG:
+                return !rightValue;
+            default:
+                throw std::runtime_error("Unknown unary operator");
+            }
+        }
+        catch(const std::exception& e)
+        {
+            if(op.token_type == TokenType::MINUS)
+            {
+                //right operand is a string
+                std::cout << "Unary minus operator applied to a string" << std::endl;
+            }
             throw std::runtime_error("Unknown unary operator");
         }
     }
@@ -180,8 +192,17 @@ class Literal : public Expression
                             result = result.substr(0, result.size() - 2);
                         }
         std::cout << result << std::endl;
-        std::throw_with_nested(std::runtime_error("Literal evaluation not implemented"));
-        return 0.0;
+        double val = 0.0;
+        try
+        {
+            val = std::stod(result);
+        }
+        catch(const std::exception& e)
+        {
+            std::throw_with_nested(
+                std::runtime_error("Literal evaluation not implemented"));
+        }
+        return val;
     }
 };
 
