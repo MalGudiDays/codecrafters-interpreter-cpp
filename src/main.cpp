@@ -6,35 +6,58 @@
 #include "tokenize.h"
 #include "parser.h"
 
-std::string read_file_contents(const std::string &filename);
+std::string read_file_contents(const std::string& filename)
+{
+    std::ifstream file(filename);
+    if (!file.is_open())
+    {
+        std::cerr << "Error reading file: " << filename << std::endl;
+        std::exit(1);
+    }
+
+    std::stringstream buffer;
+    buffer << file.rdbuf();
+    file.close();
+
+    return buffer.str();
+}
+
+// Helper function to extract a string token
+void extractStringToken(const std::string& token, std::vector<Token>& tokenList) {
+    int first = token.find_first_of('"');
+    int last = token.find_last_of('"');
+    if (first != std::string::npos && last != std::string::npos && first < last) {
+        std::string lexeme = token.substr(first + 1, last - first - 1);
+        tokenList.push_back(Token(TokenType::STRING, lexeme, lexeme, 0));
+    }
+}
+
+// Helper function to extract a general token
+void extractGeneralToken(const std::string& token, std::vector<Token>& tokenList) {
+    std::istringstream iss(token);
+    std::string tktype;
+    iss >> tktype;
+    std::string lexeme;
+    iss >> lexeme;
+    std::string literal;
+    if (!(iss >> literal)) {
+        literal = " ";
+    }
+    tokenList.push_back(Token(tktype, lexeme, literal, 0));
+}
 
 void tokenConvert(const std::vector<std::string> &tokens, std::vector<Token> &tokenList)
 {
-    for(const std::string &token: tokens)
-    {
+    for (const std::string& token : tokens) {
         std::istringstream iss(token);
-        std::string        tktype;
+        std::string tktype;
         iss >> tktype;
-        if(tktype == "STRING")
-        {
-            int first = token.find_first_of('"');
-            int last  = token.find_last_of('"');
-            if(first != std::string::npos && last != std::string::npos && first < last)
-            {
-                std::string lexeme = token.substr(first + 1, last - first - 1);
-                tokenList.push_back(Token(TokenType::STRING, lexeme, lexeme, 0));
-                continue;
-            }
-            continue;
+        if (tktype == "STRING") {
+            extractStringToken(token, tokenList);
         }
-        std::string lexeme;
-        iss >> lexeme;
-        std::string literal;
-        if(!(iss >> literal))
-        {
-            literal = " ";
+        else {
+            extractGeneralToken(token, tokenList);
         }
-        tokenList.push_back(Token(tktype, lexeme, literal, 0));
     }
 }
 
@@ -70,7 +93,7 @@ std::shared_ptr<Expression> parseExpression(Parser& parser) {
 
 // Function to evaluate or print the parsed expression
 void evaluateOrPrintExpression(const std::shared_ptr<Expression>& expr, const std::string& command) {
-    if (command == "evaluate") {
+    if (command == "evaluate" || command == "run") {
         evaluateExpression(expr);
     }
     else {
@@ -94,11 +117,14 @@ void processCommand(const std::string& command, const std::string& filename) {
     int retVal = 0;
     tokenizer.tokenize(file_contents, retVal, tokens);
 
-    if (command == "parse" || command == "evaluate") {
+    if (command == "parse" || command == "evaluate" || command == "run") {
         if (retVal) exit(retVal);
 
         std::vector<Token> tokenList;
         tokenConvert(tokens, tokenList);
+        if (tokenList.size() && tokenList[0].token_type == TokenType::PRINT) {
+            tokenList.erase(tokenList.begin());
+        }
         Parser parser(tokenList);
         try {
             std::shared_ptr<Expression> expr = parseExpression(parser);
@@ -109,8 +135,11 @@ void processCommand(const std::string& command, const std::string& filename) {
             exit(65);
         }
     }
-    else {
+    else if(command == "tokenize")
+    {
         printTokens(tokens);
+    }
+    else {
     }
 }
 
@@ -145,20 +174,4 @@ int main(int argc, char *argv[])
     }
 
     return retVal;
-}
-
-std::string read_file_contents(const std::string &filename)
-{
-    std::ifstream file(filename);
-    if(!file.is_open())
-    {
-        std::cerr << "Error reading file: " << filename << std::endl;
-        std::exit(1);
-    }
-
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    file.close();
-
-    return buffer.str();
 }
