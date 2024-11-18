@@ -99,9 +99,11 @@ std::shared_ptr<Expression> Parser::primary()
     if(match({TokenType::TRUE})) return std::make_shared<Literal>("true");
     if(match({TokenType::NIL})) return std::make_shared<Literal>("nil");
 
-    if(match({TokenType::NUMBER, TokenType::STRING}))
+    if (match({ TokenType::NUMBER, TokenType::STRING }))
     {
-        return std::make_shared<Literal>(previous().literal);
+        auto retVal = std::make_shared<Literal>(previous().literal);
+        retVal->getstring = previous().token_type == TokenType::STRING;
+        return retVal;
     }
 
     if(match({TokenType::LEFT_PAREN}))
