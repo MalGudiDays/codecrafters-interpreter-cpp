@@ -5,6 +5,7 @@
 #include <string>
 #include <memory>
 #include <iostream>
+#include <variant>
 
 enum class TokenType
 {
@@ -77,18 +78,19 @@ class Token
     void getStringtoTokenType(const std::string &str, TokenType &type);
 };
 
-class Expression
+using EvalResult = std::variant<double, bool, std::string>;
+
+    class Expression
 {
   public:
     virtual ~Expression() = default;
     virtual std::string form_string()
     {
-        return prefix_string;
+        return "";
     }
-    virtual double evaluate() = 0;
+    virtual EvalResult evaluate() const = 0;
 
   protected:
-    std::string prefix_string = "";
 
   private:
 };
@@ -110,23 +112,74 @@ class Binary : public Expression
                ")";
     }
 
-    double evaluate() override
+    EvalResult evaluate() const override
     {
-        double leftValue  = left->evaluate();
-        double rightValue = right->evaluate();
-
-        switch(op.token_type)
+        EvalResult left_result  = left->evaluate();
+        EvalResult right_result = right->evaluate();
+        if(std::holds_alternative<double>(left_result) && std::holds_alternative<double>(right_result))
         {
-        case TokenType::PLUS:
-            return leftValue + rightValue;
-        case TokenType::MINUS:
-            return leftValue - rightValue;
-        case TokenType::STAR:
-            return leftValue * rightValue;
-        case TokenType::SLASH:
-            return leftValue / rightValue;
-        default:
-            throw std::runtime_error("Unknown binary operator");
+            double left_val  = std::get<double>(left_result);
+            double right_val = std::get<double>(right_result);
+            if(op.lexeme == "+")
+            {
+                return left_val + right_val;
+            }
+            else if(op.lexeme == "-")
+            {
+                return left_val - right_val;
+            }
+            else if(op.lexeme == "*")
+            {
+                return left_val * right_val;
+            }
+            else if(op.lexeme == "/")
+            {
+                return left_val / right_val;
+            }
+            else if(op.lexeme == ">")
+            {
+                return left_val > right_val;
+            }
+            else if(op.lexeme == ">=")
+            {
+                return left_val >= right_val;
+            }
+            else if(op.lexeme == "<")
+            {
+                return left_val < right_val;
+            }
+            else if(op.lexeme == "<=")
+            {
+                return left_val <= right_val;
+            }
+            else if(op.lexeme == "==")
+            {
+                return left_val == right_val;
+            }
+            else if(op.lexeme == "!=")
+            {
+                return left_val != right_val;
+            }
+            else
+            {
+                return "";
+            }
+        }
+        else if(std::holds_alternative<std::string>(left_result) && std::holds_alternative<std::string>(right_result))
+        {
+            if(op.lexeme == "+")
+            {
+                return std::get<std::string>(left_result) + std::get<std::string>(right_result);
+            }
+            else
+            {
+                return "";
+            }
+        }
+        else
+        {
+            return op.lexeme + " " + std::get<std::string>(left_result) + " " +
+                   std::get<std::string>(right_result);
         }
     }
 };
@@ -143,30 +196,34 @@ class Unary : public Expression
         return "(" + op.lexeme + " " + right->form_string() + ")";
     }
 
-    double evaluate() override
+    EvalResult evaluate() const override
     {
-        double rightValue = 0.0;
-        try
+        EvalResult right_result = right->evaluate();
+        if(std::holds_alternative<bool>(right_result))
         {
-            rightValue = right->evaluate();
-            switch(op.token_type)
+            if(op.lexeme == "!")
             {
-            case TokenType::MINUS:
-                return -rightValue;
-            case TokenType::BANG:
-                return !rightValue;
-            default:
-                throw std::runtime_error("Unknown unary operator");
+                return !std::get<bool>(right_result);
+            }
+            else
+            {
+                return right_result;
             }
         }
-        catch(const std::exception& e)
+        else if(std::holds_alternative<double>(right_result))
         {
-            if(op.token_type == TokenType::MINUS)
+            if(op.lexeme == "-")
             {
-                //right operand is a string
-                std::cout << "Unary minus operator applied to a string" << std::endl;
+                return -std::get<double>(right_result);
             }
-            throw std::runtime_error("Unknown unary operator");
+            else
+            {
+                return "";
+            }
+        }
+        else
+        {
+            return op.lexeme + " " + std::get<std::string>(right_result);
         }
     }
 };
@@ -183,26 +240,27 @@ class Literal : public Expression
         return value;
     }
 
-    double evaluate() override
+    EvalResult evaluate() const override
     {
-      auto result = value;
-      if(result.size() >= 2 &&
-                           result.compare(result.size() - 2, 2, ".0") == 0)
-                        {
-                            result = result.substr(0, result.size() - 2);
-                        }
-        double val = 0.0;
-        try
+        if(value == "true")
         {
-            val = std::stod(result);
+            return true;
         }
-        catch(const std::exception& e)
+        else if(value == "false")
         {
-            std::cout << result << std::endl;
-            std::throw_with_nested(
-                std::runtime_error("Literal evaluation not implemented"));
+            return false;
         }
-        return val;
+        else
+        {
+            try
+            {
+                return std::stod(value);
+            }
+            catch(const std::exception &e)
+            {
+                return value;
+            }
+        }
     }
 };
 
@@ -217,7 +275,7 @@ class Grouping : public Expression
         return "(group " + expression->form_string() + ")";
     }
 
-    double evaluate() override
+    EvalResult evaluate() const override
     {
         return expression->evaluate();
     }

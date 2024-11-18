@@ -89,7 +89,7 @@ std::shared_ptr<Expression> Parser::unary()
         std::shared_ptr<Expression> right = unary();
         return std::make_shared<Unary>(op, right);
     }
-
+    
     return primary();
 }
 

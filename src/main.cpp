@@ -79,8 +79,13 @@ int main(int argc, char *argv[])
                 {
                         try
                         {
-                            double d = expr->evaluate();
-                            std::cout << d << std::endl;                            
+                            auto d = expr->evaluate();
+                            if(std::holds_alternative<double>(d))
+                                std::cout << std::get<double>(d) << std::endl;
+                            else if(std::holds_alternative<bool>(d))
+                                std::cout << std::get<bool>(d) << std::endl;
+                            else
+                                std::cout << std::get<std::string>(d) << std::endl;                            
                         }
                         catch(const std::exception &e)
                         {
