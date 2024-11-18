@@ -118,65 +118,69 @@ public:
     {
         EvalResult left_result = left->evaluate();
         EvalResult right_result = right->evaluate();
+        bool are_both_double = std::holds_alternative<double>(left_result) &&
+            std::holds_alternative<double>(right_result);
         if (op.lexeme == ">")
         {
-            return evaluateWithStringFlag(left) > evaluateWithStringFlag(right);
+            return are_both_double ? std::get<double>(left_result) > std::get<double>(right_result)
+                            : evaluateWithStringFlag(left) > evaluateWithStringFlag(right);
         }
         else if (op.lexeme == ">=")
         {
-            return evaluateWithStringFlag(left) >= evaluateWithStringFlag(right);
+            return are_both_double ? std::get<double>(left_result) >= std::get<double>(right_result)
+                : evaluateWithStringFlag(left) >= evaluateWithStringFlag(right);
         }
         else if (op.lexeme == "<")
         {
-            return evaluateWithStringFlag(left) < evaluateWithStringFlag(right);
+            return are_both_double ? std::get<double>(left_result) < std::get<double>(right_result)
+                : evaluateWithStringFlag(left) < evaluateWithStringFlag(right);
         }
         else if (op.lexeme == "<=")
         {
-            return evaluateWithStringFlag(left) <= evaluateWithStringFlag(right);
+            return are_both_double ? std::get<double>(left_result) <= std::get<double>(right_result)
+                : evaluateWithStringFlag(left) <= evaluateWithStringFlag(right);
         }
         else if (op.lexeme == "==")
         {
-            return evaluateWithStringFlag(left) == evaluateWithStringFlag(right);
+            return are_both_double ? std::get<double>(left_result) == std::get<double>(right_result)
+                : evaluateWithStringFlag(left) == evaluateWithStringFlag(right);
         }
         else if (op.lexeme == "!=")
         {
-            return evaluateWithStringFlag(left) != evaluateWithStringFlag(right);
+            return are_both_double ? std::get<double>(left_result) != std::get<double>(right_result)
+                : evaluateWithStringFlag(left) != evaluateWithStringFlag(right);
+        } 
+        else if(op.lexeme == "+")
+        {
+            if (are_both_double)
+                return std::get<double>(left_result) + std::get<double>(right_result);
+            return evaluateWithStringFlag(left) + evaluateWithStringFlag(right);
         }
-        if (std::holds_alternative<double>(left_result) && std::holds_alternative<double>(right_result))
+        else if(op.lexeme == "&&")
+        {
+            if (std::holds_alternative<bool>(left_result) && std::holds_alternative<bool>(right_result))
+            {
+                return std::get<bool>(left_result) && std::get<bool>(right_result);
+            }
+            return op.lexeme + " " + std::get<std::string>(left_result) + " " +
+                std::get<std::string>(right_result);
+        }
+        else if(op.lexeme == "||")
+        {
+            if (std::holds_alternative<bool>(left_result) && std::holds_alternative<bool>(right_result))
+            {
+                return std::get<bool>(left_result) || std::get<bool>(right_result);
+            }
+            return op.lexeme + " " + std::get<std::string>(left_result) + " " +
+                std::get<std::string>(right_result);
+        }
+        else if (are_both_double)
         {
             double left_val = std::get<double>(left_result);
             double right_val = std::get<double>(right_result);
-            if (op.lexeme == "+")
-            {
-                return left_val + right_val;
-            }
-            else if (op.lexeme == "-")
-            {
-                return left_val - right_val;
-            }
-            else if (op.lexeme == "*")
-            {
-                return left_val * right_val;
-            }
-            else if (op.lexeme == "/")
-            {
-                return left_val / right_val;
-            }
-            else
-            {
-                return "";
-            }
-        }
-        else if (std::holds_alternative<std::string>(left_result) || std::holds_alternative<std::string>(right_result))
-        {
-            if(op.lexeme == "+")
-            {
-                return evaluateWithStringFlag(left) + evaluateWithStringFlag(right);
-            }
-            else
-            {
-                return "";
-            }
+            return (op.lexeme == "-" ? left_val - right_val : 
+                       (op.lexeme == "*" ? left_val * right_val : 
+                           (op.lexeme == "/" ? left_val / right_val : 0.0)));
         }
         else
         {
