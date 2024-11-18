@@ -206,7 +206,8 @@ class Unary : public Expression
         }
         else if(std::holds_alternative<double>(right_result))
         {
-            return (op.lexeme == "-") ? -std::get<double>(right_result) : false;
+            if(op.lexeme == "-")  return -std::get<double>(right_result);
+            return false;
         }
         else if(std::holds_alternative<std::string>(right_result))
         {
