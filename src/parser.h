@@ -173,7 +173,9 @@ class Literal : public Expression
 
     double evaluate() override
     {
-        return std::stod(value);
+        std::cout << value << std::endl;
+        std::throw_with_nested(std::runtime_error("Literal evaluation not implemented"));
+        return 0.0;
     }
 };
 

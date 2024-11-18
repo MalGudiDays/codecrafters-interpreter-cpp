@@ -90,7 +90,14 @@ int main(int argc, char *argv[])
                     }
                     else
                     {
-                        std::cout << expr->evaluate() << std::endl;
+                        try
+                        {
+                            std::cout << expr->evaluate() << std::endl;
+                        }
+                        catch(const std::exception &e)
+                        {
+                            std::cerr << e.what() << '\n';
+                        }
                     }
                 }
                 else
