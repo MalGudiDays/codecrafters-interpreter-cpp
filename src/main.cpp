@@ -160,7 +160,7 @@ int main(int argc, char *argv[])
         const std::string command = args[0];
         const std::string filename = args[1];
 
-        if (command == "tokenize" || command == "parse" || command == "evaluate") {
+        if (command == "tokenize" || command == "parse" || command == "evaluate" || command == "run") {
             processCommand(command, filename);
         }
         else {
