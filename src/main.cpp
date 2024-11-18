@@ -38,6 +38,82 @@ void tokenConvert(const std::vector<std::string> &tokens, std::vector<Token> &to
     }
 }
 
+// Function to evaluate the parsed expression
+void evaluateExpression(const std::shared_ptr<Expression>& expr) {
+    try {
+        auto d = expr->evaluate();
+        if (std::holds_alternative<double>(d))
+            std::cout << std::get<double>(d) << std::endl;
+        else if (std::holds_alternative<bool>(d)) {
+            if (std::get<bool>(d))
+                std::cout << "true" << std::endl;
+            else
+                std::cout << "false" << std::endl;
+        }
+        else
+            std::cout << std::get<std::string>(d) << std::endl;
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << '\n';
+        exit(70);
+    }
+}
+
+// Function to parse the expression
+std::shared_ptr<Expression> parseExpression(Parser& parser) {
+    std::shared_ptr<Expression> expr = parser.parse();
+    if (expr == nullptr) {
+        throw std::runtime_error("Failed to parse expression");
+    }
+    return expr;
+}
+
+// Function to evaluate or print the parsed expression
+void evaluateOrPrintExpression(const std::shared_ptr<Expression>& expr, const std::string& command) {
+    if (command == "evaluate") {
+        evaluateExpression(expr);
+    }
+    else {
+        std::cout << expr->form_string() << std::endl;
+    }
+}
+
+// Function to print tokens
+void printTokens(const std::vector<std::string>& tokens) {
+    for (const std::string& token : tokens) {
+        std::cout << token << std::endl;
+    }
+}
+
+// Function to process the command
+void processCommand(const std::string& command, const std::string& filename) {
+    std::string file_contents = read_file_contents(filename);
+
+    std::vector<std::string> tokens;
+    Tokenizer tokenizer;
+    int retVal = 0;
+    tokenizer.tokenize(file_contents, retVal, tokens);
+
+    if (command == "parse" || command == "evaluate") {
+        if (retVal) exit(retVal);
+
+        std::vector<Token> tokenList;
+        tokenConvert(tokens, tokenList);
+        Parser parser(tokenList);
+        try {
+            std::shared_ptr<Expression> expr = parseExpression(parser);
+            evaluateOrPrintExpression(expr, command);
+        }
+        catch (const std::exception& e) {
+            std::cerr << e.what() << std::endl;
+            exit(65);
+        }
+    }
+    else {
+        printTokens(tokens);
+    }
+}
+
 int main(int argc, char *argv[])
 {
     int retVal = 0;
@@ -45,83 +121,27 @@ int main(int argc, char *argv[])
     std::cout << std::unitbuf;
     std::cerr << std::unitbuf;
 
-    try
-    {
+    try {
         std::vector<std::string> args(argv + 1, argv + argc);
-        if(args.size() < 2)
-        {
+        if (args.size() < 2) {
             std::cerr << "Usage: ./your_program tokenize <filename>" << std::endl;
             return 64;
         }
 
         const std::string command = args[0];
+        const std::string filename = args[1];
 
-        if(command == "tokenize" || command == "parse" || command == "evaluate")
-        {
-            std::string file_contents = read_file_contents(args[1]);
-
-            std::vector<std::string> tokens;
-            Tokenizer                tokenizer;
-            tokenizer.tokenize(file_contents, retVal, tokens);
-            if(command == "parse" || command == "evaluate")
-            {
-                if(retVal) return retVal;
-
-                std::vector<Token> tokenList;
-                tokenConvert(tokens, tokenList);
-                Parser                      parser(tokenList);
-                std::shared_ptr<Expression> expr = parser.parse();
-                if(expr == nullptr)
-                {
-                    return 65;
-                }
-                if(command == "evaluate")
-                {
-                        try
-                        {
-                            auto d = expr->evaluate();
-                            if(std::holds_alternative<double>(d))
-                                std::cout << std::get<double>(d) << std::endl;
-                            else if(std::holds_alternative<bool>(d))
-                            {
-                                if(std::get<bool>(d))
-                                    std::cout << "true" << std::endl;
-                                else
-                                    std::cout << "false" << std::endl;
-                            }
-                            else
-                                std::cout << std::get<std::string>(d) << std::endl;                            
-                        }
-                        catch(const std::exception &e)
-                        {
-                            std::string err1 = "Operand must be a number.";
-                            if(std::string(e.what()).compare(err1) == 0)
-                                return 70;
-                            return 70;
-                        }
-                }
-                else
-                {
-                    std::cout << expr->form_string() << std::endl;
-                }
-            }
-            else
-            {
-                for(const std::string &token: tokens)
-                {
-                    std::cout << token << std::endl;
-                }
-            }
+        if (command == "tokenize" || command == "parse" || command == "evaluate") {
+            processCommand(command, filename);
         }
-        else
-        {
+        else {
             std::cerr << "Unknown command: " << command << std::endl;
             return 1;
         }
     }
-    catch(const std::exception &e)
-    {
+    catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
+        return 1;
     }
 
     return retVal;
