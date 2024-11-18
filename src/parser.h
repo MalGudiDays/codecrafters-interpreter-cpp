@@ -184,6 +184,7 @@ public:
         }
         else
         {
+            throw std::runtime_error("Operands must be numbers.");
             return op.lexeme + " " + std::get<std::string>(left_result) + " " +
                 std::get<std::string>(right_result);
         }
