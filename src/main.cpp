@@ -81,6 +81,11 @@ int main(int argc, char *argv[])
                     if(auto literalExpr = std::dynamic_pointer_cast<Literal>(expr))
                     {
                         std::string result = literalExpr->value;
+                        if(result.size() >= 2 &&
+                           result.compare(result.size() - 2, 2, ".0") == 0)
+                        {
+                            result = result.substr(0, result.size() - 2);
+                        }
                         std::cout << result << std::endl;
                     }
                     else
