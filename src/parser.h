@@ -191,7 +191,6 @@ class Literal : public Expression
                         {
                             result = result.substr(0, result.size() - 2);
                         }
-        std::cout << result << std::endl;
         double val = 0.0;
         try
         {
@@ -199,6 +198,7 @@ class Literal : public Expression
         }
         catch(const std::exception& e)
         {
+            std::cout << result << std::endl;
             std::throw_with_nested(
                 std::runtime_error("Literal evaluation not implemented"));
         }
