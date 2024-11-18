@@ -122,23 +122,22 @@ public:
             std::holds_alternative<double>(right_result);
         if (op.lexeme == ">")
         {
-            return are_both_double ? std::get<double>(left_result) > std::get<double>(right_result)
-                            : evaluateWithStringFlag(left) > evaluateWithStringFlag(right);
+            if (are_both_double)
+                return std::get<double>(left_result) > std::get<double>(right_result);
         }
         else if (op.lexeme == ">=")
         {
-            return are_both_double ? std::get<double>(left_result) >= std::get<double>(right_result)
-                : evaluateWithStringFlag(left) >= evaluateWithStringFlag(right);
+            if (are_both_double)
+                return std::get<double>(left_result) >= std::get<double>(right_result);
         }
         else if (op.lexeme == "<")
         {
-            return are_both_double ? std::get<double>(left_result) < std::get<double>(right_result)
-                : evaluateWithStringFlag(left) < evaluateWithStringFlag(right);
+            if (are_both_double)
+                return std::get<double>(left_result) < std::get<double>(right_result);
         }
         else if (op.lexeme == "<=")
         {
-            return are_both_double ? std::get<double>(left_result) <= std::get<double>(right_result)
-                : evaluateWithStringFlag(left) <= evaluateWithStringFlag(right);
+            if (are_both_double) return std::get<double>(left_result) <= std::get<double>(right_result);
         }
         else if (op.lexeme == "==")
         {
@@ -166,8 +165,7 @@ public:
             {
                 return std::get<bool>(left_result) && std::get<bool>(right_result);
             }
-            return op.lexeme + " " + std::get<std::string>(left_result) + " " +
-                std::get<std::string>(right_result);
+            throw std::runtime_error("Operands must be two booleans.");
         }
         else if(op.lexeme == "||")
         {
@@ -175,8 +173,7 @@ public:
             {
                 return std::get<bool>(left_result) || std::get<bool>(right_result);
             }
-            return op.lexeme + " " + std::get<std::string>(left_result) + " " +
-                std::get<std::string>(right_result);
+            throw std::runtime_error("Operands must be two booleans.");
         }
         else if (are_both_double)
         {
@@ -186,12 +183,7 @@ public:
                        (op.lexeme == "*" ? left_val * right_val : 
                            (op.lexeme == "/" ? left_val / right_val : 0.0)));
         }
-        else
-        {
-            throw std::runtime_error("Operands must be numbers.");
-            return op.lexeme + " " + std::get<std::string>(left_result) + " " +
-                std::get<std::string>(right_result);
-        }
+        throw std::runtime_error("Operands must be numbers.");
     }
     private:
         std::string evaluateWithStringFlag(std::shared_ptr<Expression> expr, bool flag = true) const {
