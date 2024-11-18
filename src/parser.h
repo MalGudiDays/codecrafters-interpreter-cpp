@@ -218,7 +218,7 @@ class Unary : public Expression
             }
             else
             {
-                return "";
+                return false;
             }
         }
         else
