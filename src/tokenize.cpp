@@ -293,7 +293,7 @@ void Tokenizer::getnumstr(std::string &number, std::string &numberstr)
     size_t foundat = number.find('.');
     if(foundat == std::string::npos)
     {
-        numberstr = number + ".0";
+        // numberstr = number + ".0";
         return;
     }
     int i = number.size() - 1;
