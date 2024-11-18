@@ -5,6 +5,7 @@
 #include <string>
 #include <memory>
 #include <iostream>
+#include <sstream>
 #include <variant>
 
 enum class TokenType
@@ -88,7 +89,8 @@ public:
     {
         return "";
     }
-    virtual EvalResult evaluate() const = 0;
+    virtual EvalResult evaluate() = 0;
+    bool getstring = false;
 
 protected:
 
@@ -112,7 +114,7 @@ public:
             ")";
     }
 
-    EvalResult evaluate() const override
+    EvalResult evaluate() override
     {
         EvalResult left_result = left->evaluate();
         EvalResult right_result = right->evaluate();
@@ -167,28 +169,9 @@ public:
         }
         else if (std::holds_alternative<std::string>(left_result) || std::holds_alternative<std::string>(right_result))
         {
-            if (!std::holds_alternative<std::string>(left_result))
+            if(op.lexeme == "+")
             {
-                left_result = std::to_string(std::get<double>(left_result));
-            }
-            else if (!std::holds_alternative<std::string>(right_result))
-            {
-                right_result = std::to_string(std::get<double>(right_result));
-            }
-            if (op.lexeme == "+")
-            {
-                return std::get<std::string>(left_result) +
-                    std::get<std::string>(right_result);
-            }
-            else if (op.lexeme == "==")
-            {
-                return std::get<std::string>(left_result) ==
-                    std::get<std::string>(right_result);
-            }
-            else if (op.lexeme == "!=")
-            {
-                return std::get<std::string>(left_result) !=
-                    std::get<std::string>(right_result);
+                return evaluateWithStringFlag(left) + evaluateWithStringFlag(right);
             }
             else
             {
@@ -201,6 +184,14 @@ public:
                 std::get<std::string>(right_result);
         }
     }
+    private:
+        std::string evaluateWithStringFlag(std::shared_ptr<Expression> expr, bool flag = true) const {
+            bool oldFlag = expr->getstring;
+            expr->getstring = flag;
+            EvalResult result = expr->evaluate();
+            expr->getstring = oldFlag;
+            return std::get<std::string>(result);
+        }
 };
 
 class Unary : public Expression
@@ -215,7 +206,7 @@ public:
         return "(" + op.lexeme + " " + right->form_string() + ")";
     }
 
-    EvalResult evaluate() const override
+    EvalResult evaluate() override
     {
         EvalResult right_result = right->evaluate();
 
@@ -250,7 +241,7 @@ public:
         return value;
     }
 
-    EvalResult evaluate() const override
+    EvalResult evaluate() override
     {
         if (value == "true")
         {
@@ -262,6 +253,10 @@ public:
         }
         else
         {
+            if(getstring)
+            {
+                return value;
+            }
             try
             {
                 return std::stod(value);
@@ -285,7 +280,7 @@ public:
         return "(group " + expression->form_string() + ")";
     }
 
-    EvalResult evaluate() const override
+    EvalResult evaluate() override
     {
         return expression->evaluate();
     }
