@@ -225,11 +225,12 @@ public:
         }
         else if (std::holds_alternative<std::string>(right_result))
         {
-            return (op.lexeme == "!") ? (std::get<std::string>(right_result) == "nil")
-                : right_result;
+            if (op.lexeme == "!")
+                return (std::get<std::string>(right_result) == "nil");
+            throw std::runtime_error("Operand must be a number.");
         }
 
-        throw std::runtime_error("Unsupported type in unary operation");
+        throw std::runtime_error("Operand must be a number.");
     }
 };
 
