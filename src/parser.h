@@ -216,18 +216,16 @@ public:
 
         if (std::holds_alternative<bool>(right_result))
         {
-            return (op.lexeme == "!") ? !std::get<bool>(right_result) : right_result;
+            if(op.lexeme == "!") return !std::get<bool>(right_result);
         }
         else if (std::holds_alternative<double>(right_result))
         {
             if (op.lexeme == "-")  return -std::get<double>(right_result);
-            return false;
         }
         else if (std::holds_alternative<std::string>(right_result))
         {
             if (op.lexeme == "!")
                 return (std::get<std::string>(right_result) == "nil");
-            throw std::runtime_error("Operand must be a number.");
         }
 
         throw std::runtime_error("Operand must be a number.");
