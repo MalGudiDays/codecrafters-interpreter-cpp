@@ -221,6 +221,7 @@ public:
         else if (std::holds_alternative<double>(right_result))
         {
             if (op.lexeme == "-")  return -std::get<double>(right_result);
+            return false;
         }
         else if (std::holds_alternative<std::string>(right_result))
         {
