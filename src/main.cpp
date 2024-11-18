@@ -83,7 +83,12 @@ int main(int argc, char *argv[])
                             if(std::holds_alternative<double>(d))
                                 std::cout << std::get<double>(d) << std::endl;
                             else if(std::holds_alternative<bool>(d))
-                                std::cout << std::get<bool>(d) << std::endl;
+                            {
+                                if(std::get<bool>(d))
+                                    std::cout << "true" << std::endl;
+                                else
+                                    std::cout << "false" << std::endl;
+                            }
                             else
                                 std::cout << std::get<std::string>(d) << std::endl;                            
                         }
