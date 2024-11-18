@@ -109,12 +109,11 @@ void printTokens(const std::vector<std::string>& tokens) {
 }
 
 // Function to process the command
-void processCommand(const std::string& command, const std::string& filename) {
+void processCommand(const std::string& command, const std::string& filename, int& retVal) {
     std::string file_contents = read_file_contents(filename);
 
     std::vector<std::string> tokens;
     Tokenizer tokenizer;
-    int retVal = 0;
     tokenizer.tokenize(file_contents, retVal, tokens);
 
     if (command == "parse" || command == "evaluate" || command == "run") {
@@ -161,11 +160,11 @@ int main(int argc, char *argv[])
         const std::string filename = args[1];
 
         if (command == "tokenize" || command == "parse" || command == "evaluate" || command == "run") {
-            processCommand(command, filename);
+            processCommand(command, filename, retVal);
         }
         else {
             std::cerr << "Unknown command: " << command << std::endl;
-            return 1;
+            return retVal;
         }
     }
     catch (const std::exception& e) {
