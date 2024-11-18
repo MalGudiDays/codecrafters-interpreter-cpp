@@ -246,7 +246,7 @@ class Literal : public Expression
         {
             return true;
         }
-        else if(value == "false")
+        else if(value == "false" || value == "nil")
         {
             return false;
         }
