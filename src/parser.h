@@ -154,7 +154,11 @@ public:
         {
             if (are_both_double)
                 return std::get<double>(left_result) + std::get<double>(right_result);
-            return evaluateWithStringFlag(left) + evaluateWithStringFlag(right);
+            if(std::holds_alternative<std::string>(left_result) && std::holds_alternative<std::string>(right_result))
+            {
+                return std::get<std::string>(left_result) + std::get<std::string>(right_result);
+            }
+            throw std::runtime_error("Operands must be two numbers or two strings.");
         }
         else if(op.lexeme == "&&")
         {
