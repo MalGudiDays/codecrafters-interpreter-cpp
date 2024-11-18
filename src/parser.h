@@ -173,7 +173,13 @@ class Literal : public Expression
 
     double evaluate() override
     {
-        std::cout << value << std::endl;
+      auto result = value;
+      if(result.size() >= 2 &&
+                           result.compare(result.size() - 2, 2, ".0") == 0)
+                        {
+                            result = result.substr(0, result.size() - 2);
+                        }
+        std::cout << result << std::endl;
         std::throw_with_nested(std::runtime_error("Literal evaluation not implemented"));
         return 0.0;
     }

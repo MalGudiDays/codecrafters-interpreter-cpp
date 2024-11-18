@@ -77,28 +77,15 @@ int main(int argc, char *argv[])
                 }
                 if(command == "evaluate")
                 {
-                    // Check if the expression is of type Literal
-                    if(auto literalExpr = std::dynamic_pointer_cast<Literal>(expr))
-                    {
-                        std::string result = literalExpr->value;
-                        if(result.size() >= 2 &&
-                           result.compare(result.size() - 2, 2, ".0") == 0)
-                        {
-                            result = result.substr(0, result.size() - 2);
-                        }
-                        std::cout << result << std::endl;
-                    }
-                    else
-                    {
                         try
                         {
-                            std::cout << expr->evaluate() << std::endl;
+                            double d = expr->evaluate();
+                            std::cout << d << std::endl;                            
                         }
                         catch(const std::exception &e)
                         {
-                            std::cerr << e.what() << '\n';
+                            // std::cerr << e.what() << '\n';
                         }
-                    }
                 }
                 else
                 {
