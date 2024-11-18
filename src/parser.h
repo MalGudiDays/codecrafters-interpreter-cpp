@@ -52,18 +52,18 @@ enum class TokenType
 
 class Token
 {
-  public:
+public:
     TokenType   token_type;
     std::string lexeme;
     std::string literal;
     int         line;
 
-    Token(TokenType type, const std::string &lexeme, const std::string &literal, int line)
+    Token(TokenType type, const std::string& lexeme, const std::string& literal, int line)
         : token_type(type), lexeme(lexeme), literal(literal), line(line)
     {
     }
 
-    Token(std::string type, const std::string &lexeme, const std::string &literal, int line)
+    Token(std::string type, const std::string& lexeme, const std::string& literal, int line)
         : lexeme(lexeme), literal(literal), line(line)
     {
         getStringtoTokenType(type, token_type);
@@ -74,15 +74,15 @@ class Token
         return lexeme + " " + literal;
     }
 
-  private:
-    void getStringtoTokenType(const std::string &str, TokenType &type);
+private:
+    void getStringtoTokenType(const std::string& str, TokenType& type);
 };
 
 using EvalResult = std::variant<double, bool, std::string>;
 
-    class Expression
+class Expression
 {
-  public:
+public:
     virtual ~Expression() = default;
     virtual std::string form_string()
     {
@@ -90,14 +90,14 @@ using EvalResult = std::variant<double, bool, std::string>;
     }
     virtual EvalResult evaluate() const = 0;
 
-  protected:
+protected:
 
-  private:
+private:
 };
 
 class Binary : public Expression
 {
-  public:
+public:
     std::shared_ptr<Expression> left;
     Token                       op;
     std::shared_ptr<Expression> right;
@@ -109,54 +109,54 @@ class Binary : public Expression
     virtual std::string form_string() override
     {
         return "(" + op.lexeme + " " + left->form_string() + " " + right->form_string() +
-               ")";
+            ")";
     }
 
     EvalResult evaluate() const override
     {
-        EvalResult left_result  = left->evaluate();
+        EvalResult left_result = left->evaluate();
         EvalResult right_result = right->evaluate();
-        if(std::holds_alternative<double>(left_result) && std::holds_alternative<double>(right_result))
+        if (std::holds_alternative<double>(left_result) && std::holds_alternative<double>(right_result))
         {
-            double left_val  = std::get<double>(left_result);
+            double left_val = std::get<double>(left_result);
             double right_val = std::get<double>(right_result);
-            if(op.lexeme == "+")
+            if (op.lexeme == "+")
             {
                 return left_val + right_val;
             }
-            else if(op.lexeme == "-")
+            else if (op.lexeme == "-")
             {
                 return left_val - right_val;
             }
-            else if(op.lexeme == "*")
+            else if (op.lexeme == "*")
             {
                 return left_val * right_val;
             }
-            else if(op.lexeme == "/")
+            else if (op.lexeme == "/")
             {
                 return left_val / right_val;
             }
-            else if(op.lexeme == ">")
+            else if (op.lexeme == ">")
             {
                 return left_val > right_val;
             }
-            else if(op.lexeme == ">=")
+            else if (op.lexeme == ">=")
             {
                 return left_val >= right_val;
             }
-            else if(op.lexeme == "<")
+            else if (op.lexeme == "<")
             {
                 return left_val < right_val;
             }
-            else if(op.lexeme == "<=")
+            else if (op.lexeme == "<=")
             {
                 return left_val <= right_val;
             }
-            else if(op.lexeme == "==")
+            else if (op.lexeme == "==")
             {
                 return left_val == right_val;
             }
-            else if(op.lexeme == "!=")
+            else if (op.lexeme == "!=")
             {
                 return left_val != right_val;
             }
@@ -165,11 +165,30 @@ class Binary : public Expression
                 return "";
             }
         }
-        else if(std::holds_alternative<std::string>(left_result) && std::holds_alternative<std::string>(right_result))
+        else if (std::holds_alternative<std::string>(left_result) || std::holds_alternative<std::string>(right_result))
         {
-            if(op.lexeme == "+")
+            if (!std::holds_alternative<std::string>(left_result))
             {
-                return std::get<std::string>(left_result) + std::get<std::string>(right_result);
+                left_result = std::to_string(std::get<double>(left_result));
+            }
+            else if (!std::holds_alternative<std::string>(right_result))
+            {
+                right_result = std::to_string(std::get<double>(right_result));
+            }
+            if (op.lexeme == "+")
+            {
+                return std::get<std::string>(left_result) +
+                    std::get<std::string>(right_result);
+            }
+            else if (op.lexeme == "==")
+            {
+                return std::get<std::string>(left_result) ==
+                    std::get<std::string>(right_result);
+            }
+            else if (op.lexeme == "!=")
+            {
+                return std::get<std::string>(left_result) !=
+                    std::get<std::string>(right_result);
             }
             else
             {
@@ -179,14 +198,14 @@ class Binary : public Expression
         else
         {
             return op.lexeme + " " + std::get<std::string>(left_result) + " " +
-                   std::get<std::string>(right_result);
+                std::get<std::string>(right_result);
         }
     }
 };
 
 class Unary : public Expression
 {
-  public:
+public:
     Token                       op;
     std::shared_ptr<Expression> right;
 
@@ -200,19 +219,19 @@ class Unary : public Expression
     {
         EvalResult right_result = right->evaluate();
 
-        if(std::holds_alternative<bool>(right_result))
+        if (std::holds_alternative<bool>(right_result))
         {
             return (op.lexeme == "!") ? !std::get<bool>(right_result) : right_result;
         }
-        else if(std::holds_alternative<double>(right_result))
+        else if (std::holds_alternative<double>(right_result))
         {
-            if(op.lexeme == "-")  return -std::get<double>(right_result);
+            if (op.lexeme == "-")  return -std::get<double>(right_result);
             return false;
         }
-        else if(std::holds_alternative<std::string>(right_result))
+        else if (std::holds_alternative<std::string>(right_result))
         {
             return (op.lexeme == "!") ? (std::get<std::string>(right_result) == "nil")
-                                      : right_result;
+                : right_result;
         }
 
         throw std::runtime_error("Unsupported type in unary operation");
@@ -221,10 +240,10 @@ class Unary : public Expression
 
 class Literal : public Expression
 {
-  public:
+public:
     std::string value;
 
-    Literal(const std::string &value) : value(value) {}
+    Literal(const std::string& value) : value(value) {}
 
     virtual std::string form_string() override
     {
@@ -233,11 +252,11 @@ class Literal : public Expression
 
     EvalResult evaluate() const override
     {
-        if(value == "true")
+        if (value == "true")
         {
             return true;
         }
-        else if(value == "false")
+        else if (value == "false")
         {
             return false;
         }
@@ -247,7 +266,7 @@ class Literal : public Expression
             {
                 return std::stod(value);
             }
-            catch(const std::exception &e)
+            catch (const std::exception& e)
             {
                 return value;
             }
@@ -257,7 +276,7 @@ class Literal : public Expression
 
 class Grouping : public Expression
 {
-  public:
+public:
     std::shared_ptr<Expression> expression;
 
     Grouping(std::shared_ptr<Expression> expression) : expression(expression) {}
@@ -274,11 +293,11 @@ class Grouping : public Expression
 
 class Parser
 {
-  public:
-    Parser(const std::vector<Token> &tokens);
+public:
+    Parser(const std::vector<Token>& tokens);
     std::shared_ptr<Expression> parse();
 
-  private:
+private:
     std::vector<Token> tokens;
     int                current;
 
@@ -290,15 +309,15 @@ class Parser
     std::shared_ptr<Expression> unary();
     std::shared_ptr<Expression> primary();
 
-    bool  match(const std::vector<TokenType> &types);
+    bool  match(const std::vector<TokenType>& types);
     bool  check(TokenType type);
     bool  isAtEnd();
     Token advance();
     Token peek();
     Token previous();
-    Token consume(TokenType type, const std::string &message);
-    void  error(const Token &token, const std::string &message);
-    void  report(int line, const std::string &where, const std::string &message);
+    Token consume(TokenType type, const std::string& message);
+    void  error(const Token& token, const std::string& message);
+    void  report(int line, const std::string& where, const std::string& message);
 };
 
 #endif // PARSER_H
