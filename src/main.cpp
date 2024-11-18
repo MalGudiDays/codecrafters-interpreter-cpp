@@ -94,8 +94,7 @@ int main(int argc, char *argv[])
                         }
                         catch(const std::exception &e)
                         {
-                            if (e.what() == "Operand must be a number.")
-                                return 70;
+                            return 70;
                         }
                 }
                 else
