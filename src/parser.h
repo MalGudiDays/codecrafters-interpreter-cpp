@@ -118,6 +118,30 @@ public:
     {
         EvalResult left_result = left->evaluate();
         EvalResult right_result = right->evaluate();
+        if (op.lexeme == ">")
+        {
+            return evaluateWithStringFlag(left) > evaluateWithStringFlag(right);
+        }
+        else if (op.lexeme == ">=")
+        {
+            return evaluateWithStringFlag(left) >= evaluateWithStringFlag(right);
+        }
+        else if (op.lexeme == "<")
+        {
+            return evaluateWithStringFlag(left) < evaluateWithStringFlag(right);
+        }
+        else if (op.lexeme == "<=")
+        {
+            return evaluateWithStringFlag(left) <= evaluateWithStringFlag(right);
+        }
+        else if (op.lexeme == "==")
+        {
+            return evaluateWithStringFlag(left) == evaluateWithStringFlag(right);
+        }
+        else if (op.lexeme == "!=")
+        {
+            return evaluateWithStringFlag(left) != evaluateWithStringFlag(right);
+        }
         if (std::holds_alternative<double>(left_result) && std::holds_alternative<double>(right_result))
         {
             double left_val = std::get<double>(left_result);
@@ -137,30 +161,6 @@ public:
             else if (op.lexeme == "/")
             {
                 return left_val / right_val;
-            }
-            else if (op.lexeme == ">")
-            {
-                return left_val > right_val;
-            }
-            else if (op.lexeme == ">=")
-            {
-                return left_val >= right_val;
-            }
-            else if (op.lexeme == "<")
-            {
-                return left_val < right_val;
-            }
-            else if (op.lexeme == "<=")
-            {
-                return left_val <= right_val;
-            }
-            else if (op.lexeme == "==")
-            {
-                return left_val == right_val;
-            }
-            else if (op.lexeme == "!=")
-            {
-                return left_val != right_val;
             }
             else
             {
