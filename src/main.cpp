@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
                             std::string err1 = "Operand must be a number.";
                             if(std::string(e.what()).compare(err1) == 0)
                                 return 70;
-                            return 65;
+                            return 70;
                         }
                 }
                 else
