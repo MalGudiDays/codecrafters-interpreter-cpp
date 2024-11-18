@@ -199,32 +199,22 @@ class Unary : public Expression
     EvalResult evaluate() const override
     {
         EvalResult right_result = right->evaluate();
+
         if(std::holds_alternative<bool>(right_result))
         {
-            if(op.lexeme == "!")
-            {
-                return !std::get<bool>(right_result);
-            }
-            else
-            {
-                return right_result;
-            }
+            return (op.lexeme == "!") ? !std::get<bool>(right_result) : right_result;
         }
         else if(std::holds_alternative<double>(right_result))
         {
-            if(op.lexeme == "-")
-            {
-                return -std::get<double>(right_result);
-            }
-            else
-            {
-                return false;
-            }
+            return (op.lexeme == "-") ? -std::get<double>(right_result) : false;
         }
-        else
+        else if(std::holds_alternative<std::string>(right_result))
         {
-            return op.lexeme + " " + std::get<std::string>(right_result);
+            return (op.lexeme == "!") ? (std::get<std::string>(right_result) == "nil")
+                                      : right_result;
         }
+
+        throw std::runtime_error("Unsupported type in unary operation");
     }
 };
 
@@ -246,7 +236,7 @@ class Literal : public Expression
         {
             return true;
         }
-        else if(value == "false" || value == "nil")
+        else if(value == "false")
         {
             return false;
         }
