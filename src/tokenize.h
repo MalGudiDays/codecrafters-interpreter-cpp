@@ -11,7 +11,7 @@ class Tokenizer
     Tokenizer();
     void tokenize(const std::string        &file_contents,
                   int                      &ret,
-                  std::vector<std::string> &tokens);
+                  std::vector<std::string> &toks);
 
   private:
     void processLine(const std::string &line);

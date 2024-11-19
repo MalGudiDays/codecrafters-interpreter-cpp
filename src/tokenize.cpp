@@ -2,6 +2,7 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
+#include <string>
 
 const std::vector<std::string> reserved_words{"and",
                                               "class",
@@ -47,14 +48,27 @@ void Tokenizer::tokenize(const std::string        &file_contents,
     if(!file_contents.empty())
     {
         std::istringstream stream(file_contents);
-        std::string        line;
+        std::string        line, line1;
         while(std::getline(stream, line))
         {
+            if(std::count(line.begin(), line.end(), '\"') % 2 == 1)
+            {
+                ++line_num;
+                line += "\n";
+                while(std::getline(stream, line1))
+                {
+                    line += line1 + "\n";
+                    if(std::count(line.begin(), line.end(), '\"') % 2 == 1)
+                    {
+                        break;
+                    }
+                }
+            }                       
             processLine(line);
             ++line_num;
         }
     }
-    tokens.push_back("EOF  null");
+    tokens.emplace_back("EOF  null");
     toks = tokens;
     // printTokens();
     ret = retVal;
@@ -168,31 +182,31 @@ void Tokenizer::handleToken(char ch, int &index, const std::string &line)
 {
     if(token_map.find(ch) != token_map.end())
     {
-        if(ch == '=' && index && line[index - 1] == '=' && tokens.size() &&
+        if(ch == '=' && index && line[index - 1] == '=' && !tokens.empty() &&
            tokens.back() == "EQUAL = null")
         {
             tokens.pop_back();
-            tokens.push_back("EQUAL_EQUAL == null");
+            tokens.emplace_back("EQUAL_EQUAL == null");
         }
-        else if(ch == '=' && index && line[index - 1] == '!' && tokens.size() &&
+        else if(ch == '=' && index && line[index - 1] == '!' && !tokens.empty() &&
                 tokens.back() == "BANG ! null")
         {
             tokens.pop_back();
-            tokens.push_back("BANG_EQUAL != null");
+            tokens.emplace_back("BANG_EQUAL != null");
         }
-        else if(ch == '=' && index && line[index - 1] == '<' && tokens.size() &&
+        else if(ch == '=' && index && line[index - 1] == '<' && !tokens.empty() &&
                 tokens.back() == "LESS < null")
         {
             tokens.pop_back();
-            tokens.push_back("LESS_EQUAL <= null");
+            tokens.emplace_back("LESS_EQUAL <= null");
         }
-        else if(ch == '=' && index && line[index - 1] == '>' && tokens.size() &&
+        else if(ch == '=' && index && line[index - 1] == '>' && !tokens.empty() &&
                 tokens.back() == "GREATER > null")
         {
             tokens.pop_back();
-            tokens.push_back("GREATER_EQUAL >= null");
+            tokens.emplace_back("GREATER_EQUAL >= null");
         }
-        else if(ch == '/' && index && line[index - 1] == '/' && tokens.size() &&
+        else if(ch == '/' && index && line[index - 1] == '/' && !tokens.empty() &&
                 tokens.back() == "SLASH / null")
         {
             tokens.pop_back();
@@ -210,11 +224,11 @@ void Tokenizer::handleToken(char ch, int &index, const std::string &line)
     }
 }
 
-bool Tokenizer::isreserved(const std::string &ltrl)
+bool Tokenizer::isreserved(const std::string &literal)
 {
     for(const std::string &word: reserved_words)
     {
-        if(ltrl == word)
+        if(literal == word)
         {
             return true;
         }
