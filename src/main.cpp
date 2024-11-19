@@ -86,6 +86,7 @@ void evaluateExpression(const std::shared_ptr<Expression>& expr) {
 std::shared_ptr<Expression> parseExpression(Parser& parser) {
     std::shared_ptr<Expression> expr = parser.parse();
     if (expr == nullptr) {
+        exit(70);
         throw std::runtime_error("Failed to parse expression");
     }
     return expr;
