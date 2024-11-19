@@ -64,8 +64,11 @@ void Tokenizer::tokenize(const std::string        &file_contents,
                     }
                     ++line_num;
                 }
-            }                       
-            processLine(line);
+            }
+            if(line != "\n")
+            {
+                processLine(line);
+            }
             ++line_num;
         }
     }

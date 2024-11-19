@@ -2,3 +2,5 @@ print "78
 38
 10
 ";
+
+print "There should be an empty line above this.";
