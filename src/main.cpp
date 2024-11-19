@@ -127,7 +127,7 @@ void processRunCommand(const std::vector<Token>& tokenList, const std::string& c
     for (const auto& token : tokenList) {
         if (token.token_type == TokenType::SEMICOLON) {
             if (tokenPair.second.empty()) {
-                throw std::runtime_error("Empty statement");
+                exit(65);
             }
             tokenPair.second.push_back(Token(TokenType::END_OF_FILE, "null", "", 0));
             Parser parser(tokenPair.second);
