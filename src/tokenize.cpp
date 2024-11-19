@@ -58,10 +58,11 @@ void Tokenizer::tokenize(const std::string        &file_contents,
                 while(std::getline(stream, line1))
                 {
                     line += line1 + "\n";
-                    if(std::count(line.begin(), line.end(), '\"') % 2 == 1)
+                    if(std::count(line1.begin(), line1.end(), '\"') % 2 == 1)
                     {
                         break;
                     }
+                    ++line_num;
                 }
             }                       
             processLine(line);
