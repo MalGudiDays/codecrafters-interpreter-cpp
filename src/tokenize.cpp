@@ -48,29 +48,11 @@ void Tokenizer::tokenize(const std::string        &file_contents,
     {
         std::istringstream stream(file_contents);
         std::string        line;
-        std::string        ans;
         while(std::getline(stream, line))
         {
-            while (line.size())
-            {
-                if (line[0] == '\n' || line[0] == '\t' || line[0] == ' ')
-                {
-                    line = line.substr(1);
-                    continue;
-                }
-                break;
-            }
-            if (line.size())
-            {
-                ans += line;
-                if(line[line.size() - 1] != ';')
-                {
-                    ans += '\n';
-                }
-            }            
+            processLine(line);
             ++line_num;
         }
-        processLine(ans);
     }
     tokens.push_back("EOF  null");
     toks = tokens;
@@ -88,22 +70,6 @@ void Tokenizer::processLine(const std::string &line)
             return;
         }
         processCharacter(line[i], i, line);
-    }
-}
-
-void Tokenizer::handlenewline(char ch, int &index, const std::string &line)
-{
-    while(index < line.size())
-    {
-        ch = line[index];
-        if (ch == '\n' || ch == '\t' || ch == ' ')
-        {
-            ++index;
-            if(ch == '\n')
-                ++line_num;
-            continue;
-        }
-        break;
     }
 }
 
@@ -135,7 +101,6 @@ void Tokenizer::processCharacter(char ch, int &index, const std::string &line)
     {
         handleLiteral(ch, index, line);
     }
-    handlenewline(ch, index, line);
 }
 
 void Tokenizer::handleQuote(char ch, int &index, const std::string &line)
