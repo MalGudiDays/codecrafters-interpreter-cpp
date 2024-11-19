@@ -120,6 +120,30 @@ void parseAndEvaluateOrPrint(Parser& parser, const std::string& command) {
     }
 }
 
+// New function to handle breaking the list at semicolons and parsing and evaluating
+void processRunCommand(const std::vector<Token>& tokenList, const std::string& command) {
+    std::pair<TokenType, std::vector<Token>> tokenPair;
+    tokenPair.first = TokenType::PRINT;
+    for (const auto& token : tokenList) {
+        if (token.token_type == TokenType::SEMICOLON) {
+            if (tokenPair.second.empty()) {
+                throw std::runtime_error("Empty statement");
+            }
+            tokenPair.second.push_back(Token(TokenType::END_OF_FILE, "null", "", 0));
+            Parser parser(tokenPair.second);
+            parseAndEvaluateOrPrint(parser, command);
+            tokenPair.second.clear();
+            tokenPair.first = TokenType::PRINT;
+        }
+        else if (token.token_type == TokenType::PRINT) {
+            tokenPair.first = TokenType::PRINT;
+        }
+        else {
+            tokenPair.second.push_back(token);
+        }
+    }
+}
+
 // Function to process the command
 void processCommand(const std::string& command, const std::string& filename, int& retVal) {
     std::string file_contents = read_file_contents(filename);
@@ -133,42 +157,14 @@ void processCommand(const std::string& command, const std::string& filename, int
 
         std::vector<Token> tokenList;
         tokenConvert(tokens, tokenList);
-        if(command == "run")
+        if (command == "run")
         {
-            std::vector<std::pair<TokenType, std::vector<Token>>> tokenPairs;
-            int index = 0;
-            tokenPairs.resize(index + 1);
-            tokenPairs[index].first = TokenType::PRINT;
-            for(int i = 0; i < tokenList.size(); ++i)
-            {
-                if(tokenList[i].token_type == TokenType::SEMICOLON)
-                {
-                    if (tokenPairs[index].second.size() == 0) {
-                        throw std::runtime_error("Empty statement");
-                    }
-                    Token T(TokenType::END_OF_FILE, "null", "", 0);
-                    tokenPairs[index].second.push_back(T);
-                    Parser parser(tokenPairs[index].second);
-                    parseAndEvaluateOrPrint(parser, command);
-                    ++index;
-                    tokenPairs.resize(index + 1);
-                    tokenPairs[index].first = TokenType::PRINT;
-                }
-                else if(tokenList[i].token_type == TokenType::PRINT)
-                {
-                    tokenPairs[index].first = TokenType::PRINT;
-                }
-                else
-                {
-                    tokenPairs[index].second.push_back(tokenList[i]);
-                }
-            }
-            if (tokenList.size() && tokenList[0].token_type == TokenType::PRINT) {
-                tokenList.erase(tokenList.begin());
-            }
+            processRunCommand(tokenList, command);
         }
-        Parser parser(tokenList);
-        parseAndEvaluateOrPrint(parser, command);
+        else {
+            Parser parser(tokenList);
+            parseAndEvaluateOrPrint(parser, command);
+        }
     }
     else if(command == "tokenize")
     {
