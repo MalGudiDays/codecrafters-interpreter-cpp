@@ -25,6 +25,7 @@ class Tokenizer
     void finalizeLiteral(std::string &literal);
     void printTokens() const;
     void getnumstr(std::string &number, std::string &numberstr);
+    void handlenewline(char ch, int& index, const std::string& line);
 
     std::vector<std::string>    tokens;
     std::map<char, std::string> token_map;
