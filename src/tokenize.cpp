@@ -48,29 +48,35 @@ void Tokenizer::tokenize(const std::string        &file_contents,
     if(!file_contents.empty())
     {
         std::istringstream stream(file_contents);
-        std::string        line, line1;
+        std::string        line, line1 = "";
+        bool terminated = true;
         while(std::getline(stream, line))
         {
-            if(std::count(line.begin(), line.end(), '\"') % 2 == 1)
-            {
-                ++line_num;
-                line += "\n";
-                while(std::getline(stream, line1))
-                {
-                    if(std::count(line1.begin(), line1.end(), '\"') % 2 == 1)
-                    {
-                        line += line1;
-                        break;
-                    }
-                    line += line1 + "\n";
-                    ++line_num;
-                }
+            bool odd_quotes = std::count(line.begin(), line.end(), '\"') % 2 == 1;
+            if (terminated && odd_quotes) {
+                line1 = line + "\n";
+                terminated = false;
             }
-            if(line != "\n")
-            {
+            else if(terminated && !odd_quotes) {
                 processLine(line);
+                line = "";
+            }
+            else if(!terminated && odd_quotes) {
+                line1 += line + "\n";
+                terminated = true;
+                processLine(line1);
+                line = "";
+                line1 = "";
+            }
+            else {
+                line1 += line + "\n";
             }
             ++line_num;
+        }
+        if(!line1.empty())
+        {
+            --line_num;
+            processLine(line1);
         }
     }
     tokens.emplace_back("EOF  null");
@@ -86,6 +92,10 @@ void Tokenizer::processLine(const std::string &line)
         if(line[i] == '/' && i && line[i - 1] == '/')
         {
             tokens.pop_back();
+            return;
+        }
+        if(line[i] == '\n')
+        {
             return;
         }
         processCharacter(line[i], i, line);
