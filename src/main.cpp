@@ -108,6 +108,18 @@ void printTokens(const std::vector<std::string>& tokens) {
     }
 }
 
+// New function to handle parsing and evaluating or printing the expression
+void parseAndEvaluateOrPrint(Parser& parser, const std::string& command) {
+    try {
+        std::shared_ptr<Expression> expr = parseExpression(parser);
+        evaluateOrPrintExpression(expr, command);
+    }
+    catch (const std::exception& e) {
+        std::cerr << e.what() << std::endl;
+        exit(65);
+    }
+}
+
 // Function to process the command
 void processCommand(const std::string& command, const std::string& filename, int& retVal) {
     std::string file_contents = read_file_contents(filename);
@@ -121,18 +133,42 @@ void processCommand(const std::string& command, const std::string& filename, int
 
         std::vector<Token> tokenList;
         tokenConvert(tokens, tokenList);
-        if (tokenList.size() && tokenList[0].token_type == TokenType::PRINT) {
-            tokenList.erase(tokenList.begin());
+        if(command == "run")
+        {
+            std::vector<std::pair<TokenType, std::vector<Token>>> tokenPairs;
+            int index = 0;
+            tokenPairs.resize(index + 1);
+            tokenPairs[index].first = TokenType::PRINT;
+            for(int i = 0; i < tokenList.size(); ++i)
+            {
+                if(tokenList[i].token_type == TokenType::SEMICOLON)
+                {
+                    if (tokenPairs[index].second.size() == 0) {
+                        throw std::runtime_error("Empty statement");
+                    }
+                    Token T(TokenType::END_OF_FILE, "null", "", 0);
+                    tokenPairs[index].second.push_back(T);
+                    Parser parser(tokenPairs[index].second);
+                    parseAndEvaluateOrPrint(parser, command);
+                    ++index;
+                    tokenPairs.resize(index + 1);
+                    tokenPairs[index].first = TokenType::PRINT;
+                }
+                else if(tokenList[i].token_type == TokenType::PRINT)
+                {
+                    tokenPairs[index].first = TokenType::PRINT;
+                }
+                else
+                {
+                    tokenPairs[index].second.push_back(tokenList[i]);
+                }
+            }
+            if (tokenList.size() && tokenList[0].token_type == TokenType::PRINT) {
+                tokenList.erase(tokenList.begin());
+            }
         }
         Parser parser(tokenList);
-        try {
-            std::shared_ptr<Expression> expr = parseExpression(parser);
-            evaluateOrPrintExpression(expr, command);
-        }
-        catch (const std::exception& e) {
-            std::cerr << e.what() << std::endl;
-            exit(65);
-        }
+        parseAndEvaluateOrPrint(parser, command);
     }
     else if(command == "tokenize")
     {

@@ -51,9 +51,22 @@ void Tokenizer::tokenize(const std::string        &file_contents,
         std::string        ans;
         while(std::getline(stream, line))
         {
+            while (line.size())
+            {
+                if (line[0] == '\n' || line[0] == '\t' || line[0] == ' ')
+                {
+                    line = line.substr(1);
+                    continue;
+                }
+                break;
+            }
             if (line.size())
             {
-                ans += (line + '\n');
+                ans += line;
+                if(line[line.size() - 1] != ';')
+                {
+                    ans += '\n';
+                }
             }            
             ++line_num;
         }
@@ -80,10 +93,17 @@ void Tokenizer::processLine(const std::string &line)
 
 void Tokenizer::handlenewline(char ch, int &index, const std::string &line)
 {
-    while(index < line.size() && line[index] == '\n')
+    while(index < line.size())
     {
         ch = line[index];
-        ++index;
+        if (ch == '\n' || ch == '\t' || ch == ' ')
+        {
+            ++index;
+            if(ch == '\n')
+                ++line_num;
+            continue;
+        }
+        break;
     }
 }
 

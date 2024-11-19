@@ -120,40 +120,44 @@ public:
         EvalResult right_result = right->evaluate();
         bool are_both_double = std::holds_alternative<double>(left_result) &&
             std::holds_alternative<double>(right_result);
-        if (op.lexeme == ">")
+        bool are_both_boolean = std::holds_alternative<bool>(left_result) &&
+            std::holds_alternative<bool>(right_result);
+        if (op.token_type == TokenType::GREATER)
         {
             if (are_both_double)
                 return std::get<double>(left_result) > std::get<double>(right_result);
         }
-        else if (op.lexeme == ">=")
+        else if (op.token_type == TokenType::GREATER_EQUAL)
         {
             if (are_both_double)
                 return std::get<double>(left_result) >= std::get<double>(right_result);
         }
-        else if (op.lexeme == "<")
+        else if (op.token_type == TokenType::LESS)
         {
             if (are_both_double)
                 return std::get<double>(left_result) < std::get<double>(right_result);
         }
-        else if (op.lexeme == "<=")
+        else if (op.token_type == TokenType::LESS_EQUAL)
         {
             if (are_both_double) return std::get<double>(left_result) <= std::get<double>(right_result);
         }
-        else if (op.lexeme == "==")
+        else if (op.token_type == TokenType::EQUAL_EQUAL)
         {
             return are_both_double ? std::get<double>(left_result) == std::get<double>(right_result)
-                : evaluateWithStringFlag(left) == evaluateWithStringFlag(right);
+                : (!are_both_boolean ? (evaluateWithStringFlag(left) == evaluateWithStringFlag(right)) :
+                    std::get<bool>(left_result) == std::get<bool>(right_result));
         }
-        else if (op.lexeme == "!=")
+        else if (op.token_type == TokenType::BANG_EQUAL)
         {
             return are_both_double ? std::get<double>(left_result) != std::get<double>(right_result)
-                : evaluateWithStringFlag(left) != evaluateWithStringFlag(right);
+                : (!are_both_boolean ? (evaluateWithStringFlag(left) != evaluateWithStringFlag(right)) :
+                    std::get<bool>(left_result) != std::get<bool>(right_result));
         } 
         else if(op.lexeme == "+")
         {
             if (are_both_double)
                 return std::get<double>(left_result) + std::get<double>(right_result);
-            if(std::holds_alternative<std::string>(left_result) && std::holds_alternative<std::string>(right_result))
+            if(!are_both_boolean)
             {
                 return std::get<std::string>(left_result) + std::get<std::string>(right_result);
             }
