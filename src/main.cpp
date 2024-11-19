@@ -62,19 +62,22 @@ void tokenConvert(const std::vector<std::string> &tokens, std::vector<Token> &to
 }
 
 // Function to evaluate the parsed expression
-void evaluateExpression(const std::shared_ptr<Expression>& expr) {
+void evaluateExpression(const std::shared_ptr<Expression>& expr, bool print = true) {
     try {
         auto d = expr->evaluate();
-        if (std::holds_alternative<double>(d))
-            std::cout << std::get<double>(d) << std::endl;
-        else if (std::holds_alternative<bool>(d)) {
-            if (std::get<bool>(d))
-                std::cout << "true" << std::endl;
+        if (print)
+        {
+            if (std::holds_alternative<double>(d))
+                std::cout << std::get<double>(d) << std::endl;
+            else if (std::holds_alternative<bool>(d)) {
+                if (std::get<bool>(d))
+                    std::cout << "true" << std::endl;
+                else
+                    std::cout << "false" << std::endl;
+            }
             else
-                std::cout << "false" << std::endl;
+                std::cout << std::get<std::string>(d) << std::endl;
         }
-        else
-            std::cout << std::get<std::string>(d) << std::endl;
     }
     catch (const std::exception& e) {
         std::cerr << e.what() << '\n';
@@ -93,9 +96,9 @@ std::shared_ptr<Expression> parseExpression(Parser& parser) {
 }
 
 // Function to evaluate or print the parsed expression
-void evaluateOrPrintExpression(const std::shared_ptr<Expression>& expr, const std::string& command) {
+void evaluateOrPrintExpression(const std::shared_ptr<Expression>& expr, const std::string& command, bool print = true) {
     if (command == "evaluate" || command == "run") {
-        evaluateExpression(expr);
+        evaluateExpression(expr, print);
     }
     else {
         std::cout << expr->form_string() << std::endl;
@@ -110,10 +113,10 @@ void printTokens(const std::vector<std::string>& tokens) {
 }
 
 // New function to handle parsing and evaluating or printing the expression
-void parseAndEvaluateOrPrint(Parser& parser, const std::string& command) {
+void parseAndEvaluateOrPrint(Parser& parser, const std::string& command, bool print = true) {
     try {
         std::shared_ptr<Expression> expr = parseExpression(parser);
-        evaluateOrPrintExpression(expr, command);
+        evaluateOrPrintExpression(expr, command, print);
     }
     catch (const std::exception& e) {
         std::cerr << e.what() << std::endl;
@@ -124,7 +127,8 @@ void parseAndEvaluateOrPrint(Parser& parser, const std::string& command) {
 // New function to handle breaking the list at semicolons and parsing and evaluating
 void processRunCommand(const std::vector<Token>& tokenList, const std::string& command) {
     std::pair<TokenType, std::vector<Token>> tokenPair;
-    tokenPair.first = TokenType::PRINT;
+    tokenPair.first = TokenType::END_OF_FILE;
+    bool is_first = true;
     for (const auto& token : tokenList) {
         if (token.token_type == TokenType::SEMICOLON) {
             if (tokenPair.second.empty()) {
@@ -132,14 +136,16 @@ void processRunCommand(const std::vector<Token>& tokenList, const std::string& c
             }
             tokenPair.second.push_back(Token(TokenType::END_OF_FILE, "null", "", 0));
             Parser parser(tokenPair.second);
-            parseAndEvaluateOrPrint(parser, command);
+            parseAndEvaluateOrPrint(parser, command, tokenPair.first == TokenType::PRINT);
             tokenPair.second.clear();
-            tokenPair.first = TokenType::PRINT;
+            tokenPair.first = TokenType::END_OF_FILE;
+            is_first = true;
         }
-        else if (token.token_type == TokenType::PRINT) {
+        else if (is_first && token.token_type == TokenType::PRINT) {
             tokenPair.first = TokenType::PRINT;
         }
         else {
+            is_first = false;
             tokenPair.second.push_back(token);
         }
     }
